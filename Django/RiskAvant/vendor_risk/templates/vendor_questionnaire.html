@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionnaire for {{ vendor.name }}</title>
+</head>
+<body>
+    <h1>Questionnaire for {{ vendor.name }}</h1>
+    <p><strong>Vendor Type:</strong> {{ vendor.vendor_type }}</p>
+    
+    <form method="post" action="{% url 'submit_questionnaire' vendor.id %}">
+        {% csrf_token %}
+        <ul>
+            {% for question in questions %}
+                <li>
+                    <p><strong>{{ question.question_text }}</strong></p>
+                    <input type="text" name="answer_{{ question.id }}" placeholder="Enter your answer">
+                </li>
+            {% endfor %}
+        </ul>
+        <button type="submit">Submit Questionnaire</button>
+    </form>
+</body>
+</html>
