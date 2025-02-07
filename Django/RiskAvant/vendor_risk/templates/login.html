@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiskAvant - Login</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #1f4037, #99f2c8);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            width: 40%;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            color: white;
+            font-size: 2.5em;
+        }
+        p {
+            font-size: 20px;
+            color: white;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin-top: 20px;
+            font-size: 18px;
+            color: white;
+            background: #d4542d;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s ease-in-out;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn:hover {
+            background: #ff4f91;
+        }
+        .form-container {
+            margin-top: 20px;
+        }
+        input {
+            width: 60%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            width: 55%;
+            padding: 10px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to RiskAvant</h1>
+        <p>Log in to continue</p>
+        <div class="form-container">
+            <form method="post" action="/home/">
+                {% csrf_token %}
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Sign In</button>
+            </form>
+            <p>Don't have an account? <a href="/admin/" class="btn">Sign Up</a></p>
+        </div>
+    </div>
+</body>
+</html>
