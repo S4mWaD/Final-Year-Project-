@@ -1,10 +1,12 @@
 from django.contrib import admin
-from .models import *
+from django.contrib.auth.admin import UserAdmin
+from .models import CustomUser
 
-
-# Register your models here.
-admin.site.register(Vendor)
-admin.site.register(RiskAssessment)
-admin.site.register(Questionnaire)
-admin.site.register(VendorResponse)
-
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (
+        ('Additional Info', {'fields': ('role',)}),
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('Additional Info', {'fields': ('role',)}),
+    )

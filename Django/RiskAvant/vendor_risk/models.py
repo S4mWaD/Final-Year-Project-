@@ -1,19 +1,32 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now
 
-# Core Tables
+# 🔹 Custom User Model
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = [
+        ('Admin', 'Admin'),
+        ('User', 'User')
+    ]
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='User')
+
+    def __str__(self):
+        return self.username
+
+
+# 🔹 Vendor Model
 class Vendor(models.Model):
-    name = models.CharField(max_length=255)
-    Vendor_Type = [
+    VENDOR_TYPES = [
         ('Cloud Service Provider', 'Cloud Service Provider'), 
         ('Software Vendor', 'Software Vendor'), 
         ('Network Infrastructure', 'Network Infrastructure'), 
         ('Data Center', 'Data Center'), 
         ('Other', 'Other')
     ]
+    name = models.CharField(max_length=255)
+    vendor_type = models.CharField(max_length=50, choices=VENDOR_TYPES, default='Cloud Service Provider')
     contact_email = models.EmailField()
     contact_phone = models.CharField(max_length=20)
-    vendor_type = models.CharField(max_length=50, choices=Vendor_Type, default='Cloud Service Provider')
     address = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -24,28 +37,25 @@ class Vendor(models.Model):
     def get_questions(self):
         return Questionnaire.objects.filter(vendor_type=self.vendor_type)
 
+
+# 🔹 Security Questionnaire Model
 class Questionnaire(models.Model):
-    """
-    Stores predefined security-related questions for different vendor types.
-    """
-    Vendor_Type = [
+    VENDOR_TYPES = [
         ('Cloud Service Provider', 'Cloud Service Provider'), 
         ('Software Vendor', 'Software Vendor'), 
         ('Network Infrastructure', 'Network Infrastructure'), 
         ('Data Center', 'Data Center'), 
         ('Other', 'Other')
     ]
-    vendor_type = models.CharField(max_length=50, choices=Vendor_Type)
+    vendor_type = models.CharField(max_length=50, choices=VENDOR_TYPES)
     question_text = models.TextField()
 
     def __str__(self):
         return f"{self.vendor_type} - {self.question_text}"
 
-# 🔹 NEW Model: Stores responses to the questionnaire from vendors.
+
+# 🔹 Vendor Response Model
 class VendorResponse(models.Model):
-    """
-    Store vendor responses to security-related questions.
-    """
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='responses')
     question = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='responses')
     response = models.CharField(max_length=255, choices=[
@@ -58,11 +68,9 @@ class VendorResponse(models.Model):
     def __str__(self):
         return f"{self.vendor.name} - {self.question.question_text[:50]}"
 
+
+# 🔹 Risk Assessment Model
 class RiskAssessment(models.Model):
-    """
-    Stores risk assessment details for a vendor.
-    Risk score is dynamically computed based on questionnaire responses.
-    """
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='risk_assessments')
     assessment_date = models.DateField(default=now)
     risk_score = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)

@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'vendor_risk',
 ]
 
+AUTH_USER_MODEL = 'vendor_risk.CustomUser'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

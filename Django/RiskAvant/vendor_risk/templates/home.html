@@ -3,48 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RiskAvant - Home</title>
+    <title>Welcome</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 50px;
-        }
-        h1 {
-            color: #333;
-        }
-        p {
-            font-size: 18px;
+            background-color: #f9f9f9;
         }
         .container {
-            background: white;
+            width: 60%;
+            margin: 50px auto;
+            background: #fff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            width: 50%;
-            margin: auto;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            margin-top: 20px;
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        input, select, button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
             color: white;
-            background-color: #007BFF;
-            text-decoration: none;
-            border-radius: 5px;
+            border: none;
+            cursor: pointer;
         }
-        .btn:hover {
-            background-color: #0056b3;
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to RiskAvant</h1>
-        <p>Please login to continue.</p>
-        <a href="/login" class="btn">Login</a>
+        <h2>Onboarding Questions</h2>
+        <form method="post">
+            {% csrf_token %}
+            <label for="industry">Your Industry</label>
+            <select id="industry" name="industry">
+                <option value="Cloud Service Provider">Cloud Service Provider</option>
+                <option value="Software Vendor">Software Vendor</option>
+                <option value="Network Infrastructure">Network Infrastructure</option>
+                <option value="Data Center">Data Center</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="org_size">Organization Size</label>
+            <select id="org_size" name="org_size">
+                <option value="Small">Small</option>
+                <option value="Medium">Medium</option>
+                <option value="Large">Large</option>
+            </select>
+
+            <label for="region">Operating Region</label>
+            <input type="text" id="region" name="region" placeholder="Enter your region">
+
+            <button type="submit">Start Security Questionnaire</button>
+        </form>
     </div>
 </body>
 </html>

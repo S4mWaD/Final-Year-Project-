@@ -2,10 +2,22 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Vendor, Questionnaire
 from .utils import calculate_risk_score, classify_risk
+from .forms import SignUpForm
+
+def login(request):
+    return render(request, "login.html")
+
+def signup_view(request):
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = SignUpForm()
+    return render(request, 'signup.html', {'form': form})
 
 def home(request):
-    return render(request, "home.html")
-
+    return render(request, 'home.html', {'user': request.user})
 def vendor_questionnaire(request, vendor_id):
 
     vendor = get_object_or_404(Vendor, pk=vendor_id)
@@ -47,3 +59,4 @@ def get_risk_assessment(request, vendor_id):
             'risk_category': risk_category
          }
          )
+
