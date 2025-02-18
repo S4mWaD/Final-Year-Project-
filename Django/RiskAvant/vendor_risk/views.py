@@ -1,14 +1,26 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from .models import Vendor, Questionnaire
 from .utils import calculate_risk_score, classify_risk
 from .forms import SignUpForm
 
-def login(request):
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)    
+            return redirect('home')
+        else: 
+            return render(request, 'login.html', {'error': 'Invalid username or password'})
     return render(request, "login.html")
 
 def signup_view(request):
     if request.method == 'POST':
+        form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('login')
@@ -16,6 +28,7 @@ def signup_view(request):
         form = SignUpForm()
     return render(request, 'signup.html', {'form': form})
 
+@login_required
 def home(request):
     return render(request, 'home.html', {'user': request.user})
 def vendor_questionnaire(request, vendor_id):

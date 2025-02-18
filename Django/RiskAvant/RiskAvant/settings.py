@@ -42,6 +42,14 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'vendor_risk.CustomUser'
 
+LOGIN_URL = '/login/'
+
+LOGIN_REDIRECT_URL = '/home/'
+
+LOGOUT_REDIRECT_URL = '/login/'
+
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -79,8 +87,8 @@ WSGI_APPLICATION = 'RiskAvant.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'riskavant',
-        'USER': 'admin',
+        'NAME': 'riskavanta',
+        'USER': 'postgres',
         'PASSWORD': 'sorryla',
         'HOST': 'localhost',
         'PORT': '5432',

@@ -7,17 +7,20 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
+            background: linear-gradient(120deg, #a8edea, #fed6e3); /* Vibrant gradient background */
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .container {
-            width: 50%;
-            margin: 50px auto;
+            width: 40%;
             background: #fff;
-            border-radius: 8px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
         }
         h1 {
             text-align: center;
@@ -26,26 +29,23 @@
         form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
-        input, select, button {
+        input, button {
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 5px;
         }
         button {
             background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
+            font-size: 18px;
         }
         button:hover {
             background-color: #45a049;
-        }
-        .error {
-            color: red;
-            font-size: 14px;
         }
     </style>
 </head>
