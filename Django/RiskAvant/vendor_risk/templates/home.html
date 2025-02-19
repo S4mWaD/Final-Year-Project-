@@ -1,110 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home | RiskAvant</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #4caf50;
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        header h1 {
-            margin: 0;
-        }
-        .user-info {
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .logout-button {
-            background: #f44336;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .logout-button:hover {
-            background: #d32f2f;
-        }
-        .container {
-            max-width: 1100px;
-            margin: 30px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .features h2 {
-            text-align: center;
-            color: #333;
-        }
-        .features .feature-item {
-            margin: 20px 0;
-        }
-        .feature-item h3 {
-            color: #4caf50;
-        }
-        button {
-            display: block;
-            margin: 30px auto;
-            padding: 15px 30px;
-            font-size: 18px;
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
-</head>
-<body>
-    <header>
+{% extends 'base.html' %}
+
+{% block title %}Home | RiskAvant{% endblock %}
+
+{% block content %}
+    <header class="home-header">
         <h1>Welcome to RiskAvant</h1>
         <div class="user-info">
-            Logged in as: <strong>{{ user.username }}</strong>
-            <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="logout-button">Log Out</button>
-            </form>
+            {% if user.is_authenticated %}
+                Logged in as: <strong>{{ user.username }}</strong>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Log Out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn">Login</a>
+                <a href="{% url 'register' %}" class="btn">Register</a>
+            {% endif %}
         </div>
     </header>
 
     <div class="container">
-        <section class="features">
-            <h2>Key Features</h2>
-            <div class="feature-item">
-                <h3>Feature 1: Automated Security Assessments</h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a velit at urna ultrices hendrerit.</p>
-            </div>
-            <div class="feature-item">
-                <h3>Feature 2: Comprehensive Reporting</h3>
-                <p>Curabitur sit amet lorem eu quam fermentum scelerisque. Sed vitae odio non lorem vulputate cursus.</p>
-            </div>
-            <div class="feature-item">
-                <h3>Feature 3: Easy Vendor Onboarding</h3>
-                <p>Donec eget ligula vitae nulla venenatis tincidunt. Integer posuere lectus et arcu ultricies faucibus.</p>
-            </div>
-        </section>
-
-        <button id="start-onboarding">Start Onboarding</button>
+        {% if user.is_authenticated %}
+            {% if user.is_staff or user.is_superuser %}
+                <!-- Admin Dashboard -->
+                <section class="admin-dashboard">
+                    <h2>Admin Dashboard</h2>
+                    <p>Here are the insights for all users:</p>
+                    <ul>
+                        <li>Total Users: {{ total_users }}</li>
+                        <li>Active Users: {{ active_users }}</li>
+                        <li>Pending Onboarding: {{ pending_onboarding }}</li>
+                    </ul>
+                </section>
+            {% else %}
+                <!-- User Content -->
+                <section class="features">
+                    <h2>Key Features</h2>
+                    <div class="feature-item">
+                        <h3>Feature 1: Automated Security Assessments</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a velit at urna ultrices hendrerit.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Feature 2: Comprehensive Reporting</h3>
+                        <p>Curabitur sit amet lorem eu quam fermentum scelerisque. Sed vitae odio non lorem vulputate cursus.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Feature 3: Easy Vendor Onboarding</h3>
+                        <p>Donec eget ligula vitae nulla venenatis tincidunt. Integer posuere lectus et arcu ultricies faucibus.</p>
+                    </div>
+                </section>
+                <button id="start-onboarding">Start Onboarding</button>
+            {% endif %}
+        {% else %}
+            <p>Please <a href="{% url 'login' %}">Login</a> to start onboarding vendors.</p>
+        {% endif %}
     </div>
-</body>
-</html>
+{% endblock %}

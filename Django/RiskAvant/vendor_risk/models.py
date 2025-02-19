@@ -11,7 +11,7 @@ class CustomUser(AbstractUser):
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='User')
 
     def __str__(self):
-        return self.username
+        return f"{self.username} - ({self.role})"
 
 
 # 🔹 Vendor Model
@@ -81,3 +81,4 @@ class RiskAssessment(models.Model):
 
     def __str__(self):
         return f"{self.vendor.name} - {self.assessment_date}"
+

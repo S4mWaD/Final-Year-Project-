@@ -1,15 +1,15 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
-from . import views
+from .views import LoginView, SignupView, VendorListView, VendorDetailView, RiskAssessmentView, QuestionnaireListView
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
-    path ('login/', views.login_view, name='login'), #auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-    path ('signup/', views.signup_view, name='signup'),
-    path ('home/', views.home, name='home'),
-    path ('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
-    path('vendor/<int:vendor_id>/', views.vendor_questionnaire, name='vendor_questionnaire'),
-    path('vendor/<int:vendor_id>/submit/', views.submit_questionnaire, name='submit_questionnaire'),
-    path('vendor/<int:vendor_id>/detail/', views.vendor_detail, name='vendor_detail'),
-    path('vendor/<int:vendor_id>/detail', views.vendor_detail, name='vendor_detail'),
-    path('vendor-risk/<int:vendor_id>/', views.get_risk_assessment, name='get_risk_assessment'),
+    path('api/login/', LoginView.as_view(), name='api-login'),
+    path('api/signup/', SignupView.as_view(), name='api-signup'),
+    path('api/token-auth/', obtain_auth_token, name='api-token-auth'),
+    path('api/vendors/', VendorListView.as_view(), name='vendor-list'),
+    path('api/vendors/<int:vendor_id>/', VendorDetailView.as_view(), name='vendor-detail'),
+    path('api/vendors/<int:vendor_id>/risk/', RiskAssessmentView.as_view(), name='vendor-risk'),
+    path('api/qustionnaire/', QuestionnaireListView.as_view(), name='questionnaire-list'),
+    path('api/risk-assessment/', RiskAssessmentView.as_view(), name='risk-assessment-list'),
+
 ]

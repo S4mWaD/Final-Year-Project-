@@ -1,75 +1,79 @@
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.authtoken.models import Token
+from rest_framework import status
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from .models import Vendor, Questionnaire
+from .serializers import VendorSerializer, QuestionnaireSerializer
 from .utils import calculate_risk_score, classify_risk
-from .forms import SignUpForm
+from django.shortcuts import get_object_or_404
 
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)    
-            return redirect('home')
-        else: 
-            return render(request, 'login.html', {'error': 'Invalid username or password'})
-    return render(request, "login.html")
+class LoginView(APIView):
+    permission_classes = [AllowAny]
 
-def signup_view(request):
-    if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:
-        form = SignUpForm()
-    return render(request, 'signup.html', {'form': form})
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key}, status=status.HTTP_200_OK)
+        return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
-@login_required
-def home(request):
-    return render(request, 'home.html', {'user': request.user})
-def vendor_questionnaire(request, vendor_id):
+class SignupView(APIView):
+    permission_classes = [AllowAny]
 
-    vendor = get_object_or_404(Vendor, pk=vendor_id)
-    questions = vendor.get_questions()
-    
-    return render(request, 'vendor_questionnaire.html', {'vendor': vendor, 'questions': questions})
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if User.objects.filter(username=username).exists():
+            return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.create_user(username=username, password=password)
+        token = Token.objects.create(user=user)
+        return Response({'token': token.key}, status=status.HTTP_201_CREATED)
 
-def submit_questionnaire(request, vendor_id):
-    if request.method == "POST":
-        vendor = get_object_or_404(Vendor, id=vendor_id)
-        responses = []
-        
-        # Iterate through all questions and save responses
-        for question in Questionnaire.objects.filter(vendor_type=vendor.vendor_type):
-            answer = request.POST.get(f"answer_{question.id}")
-            if answer:
-                responses.append((question, answer))  # Save or process each response here
-        
-                # Response.objects.create(vendor=vendor, question=question, answer=answer)
-        
-        # Redirect to a success page or back to the vendor detail page
-        return redirect('vendor_detail', vendor_id=vendor.id)
+class VendorListView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    return redirect('vendor_detail', vendor_id=vendor_id)
+    def get(self, request):
+        vendors = Vendor.objects.all()
+        serializer = VendorSerializer(vendors, many=True)
+        return Response(serializer.data)
 
-def vendor_detail(request, vendor_id):
-    vendor = get_object_or_404(Vendor, pk=vendor_id)
-    return render(request, 'vendor_detail.html', {'vendor': vendor})
+class VendorDetailView(APIView):
+    permission_classes = [IsAuthenticated]
 
-def get_risk_assessment(request, vendor_id):
-    vendor = get_object_or_404(Vendor, pk=vendor_id)
-    risk_score = calculate_risk_score(vendor)
-    risk_category = classify_risk(risk_score)
-    
-    return JsonResponse(
-        {
+    def get(self, request, vendor_id):
+        vendor = get_object_or_404(Vendor, pk=vendor_id)
+        serializer = VendorSerializer(vendor)
+        return Response(serializer.data)
+
+class RiskAssessmentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, vendor_id):
+        vendor = get_object_or_404(Vendor, pk=vendor_id)
+        risk_score = calculate_risk_score(vendor)
+        risk_category = classify_risk(risk_score)
+        return Response({
             'vendor_name': vendor.name,
             'risk_score': risk_score,
             'risk_category': risk_category
-         }
-         )
+        })
 
+class QuestionnaireListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        questionnaires = Questionnaire.objects.all()
+        serializer = QuestionnaireSerializer(questionnaires, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = QuestionnaireSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
