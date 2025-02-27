@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RiskAvant - Vendor Onboarding</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="onboarding-page">
+    <div class="top-nav">
+        <span>RiskAvant Vendor Onboarding</span>
+        <a href="#">Dashboard</a>
+    </div>
+
+    <div class="sidebar">
+        <h3>Navigation</h3>
+        <a href="/">Home</a>
+        <a href="#">Vendors</a>
+        <a href="#">Risk Assessment</a>
+        <a href="#">Compliance</a>
+        <a href="#">Audit Logs</a>
+    </div>
+
+    <div class="main-content">
+        <h1>Vendor Onboarding Form</h1>
+
+        <div class="card">
+            <h2>General Company Information</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="name">Company Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="industry">Industry:</label>
+                    <select id="industry" name="industry" required>
+                        <option value="">Select Industry</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Government">Government</option>
+                        <option value="Retail">Retail</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="contact_email">Contact Email:</label>
+                    <input type="email" id="contact_email" name="contact_email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="contact_phone">Contact Phone:</label>
+                    <input type="text" id="contact_phone" name="contact_phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Company Address:</label>
+                    <textarea id="address" name="address" rows="3" required></textarea>
+                </div>
+                
+                <h2>Compliance & Certification</h2>
+
+                <div class="form-group">
+                    <label for="compliance_status">Compliance Status:</label>
+                    <select id="compliance_status" name="compliance_status" required>
+                        <option value="">Select Compliance Status</option>
+                        <option value="Compliant">Compliant</option>
+                        <option value="Non-Compliant">Non-Compliant</option>
+                        <option value="Partial">Partial</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Security & Compliance Standards:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="iso27001" name="compliance[]" value="ISO 27001">
+                        <label for="iso27001">ISO 27001</label>
+
+                        <input type="checkbox" id="nist" name="compliance[]" value="NIST">
+                        <label for="nist">NIST</label>
+
+                        <input type="checkbox" id="gdpr" name="compliance[]" value="GDPR">
+                        <label for="gdpr">GDPR</label>
+
+                        <input type="checkbox" id="soc2" name="compliance[]" value="SOC 2">
+                        <label for="soc2">SOC 2</label>
+
+                        <input type="checkbox" id="hipaa" name="compliance[]" value="HIPAA">
+                        <label for="hipaa">HIPAA</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="certified">Is your organization certified?</label>
+                    <select id="certified" name="certified" required>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="auditable">Is your organization auditable?</label>
+                    <select id="auditable" name="auditable" required>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <h2>Security & Risk Assessment</h2>
+
+                <div class="form-group">
+                    <label for="risk_score">Self-assessed Risk Score (1-100):</label>
+                    <input type="number" id="risk_score" name="risk_score" min="1" max="100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="security_measures">Briefly describe security measures in place:</label>
+                    <textarea id="security_measures" name="security_measures" rows="4"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="security_docs">Upload Security Documentation (if any):</label>
+                    <input type="file" id="security_docs" name="security_docs">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit Onboarding</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 RiskAvant. All Rights Reserved.</p>
+    </div>
+</body>
+</html>

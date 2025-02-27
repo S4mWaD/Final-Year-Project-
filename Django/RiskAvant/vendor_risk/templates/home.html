@@ -1,58 +1,89 @@
-{% extends 'base.html' %}
-
-{% block title %}Home | RiskAvant{% endblock %}
-
-{% block content %}
-    <header class="home-header">
-        <h1>Welcome to RiskAvant</h1>
-        <div class="user-info">
-            {% if user.is_authenticated %}
-                Logged in as: <strong>{{ user.username }}</strong>
-                <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-button">Log Out</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn">Login</a>
-                <a href="{% url 'register' %}" class="btn">Register</a>
-            {% endif %}
-        </div>
-    </header>
-
-    <div class="container">
-        {% if user.is_authenticated %}
-            {% if user.is_staff or user.is_superuser %}
-                <!-- Admin Dashboard -->
-                <section class="admin-dashboard">
-                    <h2>Admin Dashboard</h2>
-                    <p>Here are the insights for all users:</p>
-                    <ul>
-                        <li>Total Users: {{ total_users }}</li>
-                        <li>Active Users: {{ active_users }}</li>
-                        <li>Pending Onboarding: {{ pending_onboarding }}</li>
-                    </ul>
-                </section>
-            {% else %}
-                <!-- User Content -->
-                <section class="features">
-                    <h2>Key Features</h2>
-                    <div class="feature-item">
-                        <h3>Feature 1: Automated Security Assessments</h3>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a velit at urna ultrices hendrerit.</p>
-                    </div>
-                    <div class="feature-item">
-                        <h3>Feature 2: Comprehensive Reporting</h3>
-                        <p>Curabitur sit amet lorem eu quam fermentum scelerisque. Sed vitae odio non lorem vulputate cursus.</p>
-                    </div>
-                    <div class="feature-item">
-                        <h3>Feature 3: Easy Vendor Onboarding</h3>
-                        <p>Donec eget ligula vitae nulla venenatis tincidunt. Integer posuere lectus et arcu ultricies faucibus.</p>
-                    </div>
-                </section>
-                <button id="start-onboarding">Start Onboarding</button>
-            {% endif %}
-        {% else %}
-            <p>Please <a href="{% url 'login' %}">Login</a> to start onboarding vendors.</p>
-        {% endif %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - RiskAvant</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="top-nav">
+  <div>RiskAvant</div>
+  <div>
+    <a href="{% url 'alerts' %}">Notifications</a>
+    <a href="{% url 'profile' %}">Profile</a>
+  </div>
+</div>
+<div class="sidebar">
+  <h3>Menu</h3>
+  <a href="{% url 'dashboard' %}">Dashboard</a>
+  <a href="{% url 'vendor-list' %}">Vendors</a>
+  <a href="{% url 'risk-list' %}">Risk Assessments</a>
+  <a href="{% url 'checklist-list' %}">Checklists</a>
+  <a href="{% url 'compliance' %}">Compliance</a>
+  <a href="{% url 'alerts' %}">Alerts</a>
+  <a href="{% url 'audit-log' %}">Audit Log</a>
+  <a href="{% url 'settings' %}">Settings</a>
+</div>
+<div class="main-content">
+  <div class="breadcrumbs">Dashboard</div>
+  {% if user.role == 'Admin' %}
+  <div class="card">
+    <h2>Real-Time Metrics</h2>
+    <div class="metrics-grid">
+      <div>Total Vendors: {{ total_vendors }}</div>
+      <div>High-Risk Vendors: {{ high_risk_vendors }}</div>
+      <div>Completed Assessments: {{ completed_assessments }}%</div>
+      <div>Compliance Rate: {{ compliance_rate }}%</div>
     </div>
-{% endblock %}
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <h2>Risk Level Distribution</h2>
+      <div class="chart-placeholder">Pie Chart</div>
+    </div>
+    <div class="card">
+      <h2>Vendor Compliance Trends</h2>
+      <div style="width: 100%; height: 250px; background: linear-gradient(135deg, #F5F7FA 0%, #CFD8DC 100%); border-radius: 10px;">Bar Chart</div>
+    </div>
+    <div class="card">
+      <h2>Recent Activity</h2>
+      <ul>
+        {% for activity in recent_activities %}
+        <li>{{ activity.description }} - <span class="timestamp">{{ activity.date }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+    <button class="btn btn-primary">Add Vendor</button>
+    <button class="btn btn-primary">Generate Assessment</button>
+    <button class="btn btn-primary">Run Report</button>
+  </div>
+  {% elif user.role == 'Vendor' %}
+  <div class="card">
+    <h2>Your Vendor Data</h2>
+    <div class="metrics-grid">
+      <div>Your Risk Score: {{ vendor_data.risk_score }}</div>
+      <div>Compliance Status: {{ vendor_data.compliance_status }}</div>
+      <div>Pending Assessments: {{ vendor_data.pending_assessments }}</div>
+      <div>Completed Checklists: {{ vendor_data.completed_checklists }}</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Your Recent Activity</h2>
+    <ul>
+      {% for activity in vendor_data.recent_activities %}
+      <li>{{ activity.description }} - <span class="timestamp">{{ activity.date }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  <div class="footer">
+    © 2025 RiskAvant | <a href="#">Privacy Policy</a> | <a href="#">Support</a>
+  </div>
+</div>
+</body>
+</html>

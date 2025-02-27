@@ -3,60 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(120deg, #a8edea, #fed6e3); /* Vibrant gradient background */
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            width: 40%;
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        input, button {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <title>Sign Up - RiskAvant</title>
+    {% load static %}
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <h1>Create an Account</h1>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Sign Up</button>
-        </form>
+<body style="background: linear-gradient(135deg, #ECEFF1 0%, #CFD8DC 100%);">
+    <div class="main-content" style="margin-left: 0; padding: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+        <div class="card" style="width: 450px;">
+            <h2>Create an Account</h2>
+            {% if messages %}
+                <ul class="error-message" style="color: red; font-size: 14px;">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <form id="signup-form" method="post" action="{% url 'signup' %}">
+                {% csrf_token %}
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" placeholder="Enter first name" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" placeholder="Enter last name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="organization">Organization Name</label>
+                    <input type="text" id="organization" name="organization_name" placeholder="Enter organization name" required>
+                </div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password1">Password</label>
+                    <input type="password" id="password1" name="password1" placeholder="Enter password" required>
+                </div>
+                <div class="form-group">
+                    <label for="password2">Confirm Password</label>
+                    <input type="password" id="password2" name="password2" placeholder="Confirm password" required>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="terms" name="terms" required style="width: 20px; height: 20px;">
+                    <label for="terms" style="margin: 0; font-size: 14px;">I accept the <a href="/terms" target="_blank">Terms and Conditions</a></label>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+            </form>
+            <p style="margin-top: 15px; font-size: 0.9em; text-align: center;">
+                Or sign up with: <br>
+                <a href="" class="btn btn-google" style="margin-top: 10px; display: inline-flex; align-items: center; gap: 8px;">
+                    Sign in with Google
+                </a>
+            </p>
+            <p style="margin-top: 15px; font-size: 0.9em; text-align: center;">
+                Already have an account? <a href="{% url 'login' %}" style="color: #1976D2; font-weight: 500;">Login</a>
+            </p>
+        </div>
     </div>
+    <script>
+        document.getElementById("signup-form").addEventListener("submit", function(event) {
+            let requiredFields = document.querySelectorAll("#signup-form input[required]");
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.border = "2px solid red";  // Highlight empty fields
+                    isValid = false;
+                } else {
+                    field.style.border = "";  // Reset border if filled
+                }
+            });
+            
+            if (!isValid) {
+                event.preventDefault();  // Prevent form submission if any required field is empty
+                alert("Please fill in all required fields.");
+            }
+        });
+    </script>
 </body>
 </html>

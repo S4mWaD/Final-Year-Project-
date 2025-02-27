@@ -9,10 +9,15 @@ class CustomUser(AbstractUser):
         ('User', 'User')
     ]
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='User')
-
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    username = models.CharField(max_length=255, unique=True)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=255)
+    organization_name = models.CharField(max_length=255, blank=True, null=True)  # Added organization name field
+    
     def __str__(self):
         return f"{self.username} - ({self.role})"
-
 
 # 🔹 Vendor Model
 class Vendor(models.Model):
@@ -28,6 +33,12 @@ class Vendor(models.Model):
     contact_email = models.EmailField()
     contact_phone = models.CharField(max_length=20)
     address = models.TextField()
+    website = models.URLField(blank=True, null=True)
+    tax_id = models.CharField(max_length=50, blank=True, null=True)
+    business_license = models.CharField(max_length=50, blank=True, null=True)
+    years_in_operation = models.IntegerField(blank=True, null=True)
+    certifications = models.JSONField(blank=True, null=True)  # Store as JSON list
+    insurance_coverage = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -36,7 +47,6 @@ class Vendor(models.Model):
 
     def get_questions(self):
         return Questionnaire.objects.filter(vendor_type=self.vendor_type)
-
 
 # 🔹 Security Questionnaire Model
 class Questionnaire(models.Model):
@@ -47,12 +57,19 @@ class Questionnaire(models.Model):
         ('Data Center', 'Data Center'), 
         ('Other', 'Other')
     ]
+    QUESTION_CATEGORIES = [
+        ('Security', 'Security'),
+        ('Compliance', 'Compliance'),
+        ('Legal', 'Legal'),
+        ('Operational', 'Operational')
+    ]
     vendor_type = models.CharField(max_length=50, choices=VENDOR_TYPES)
     question_text = models.TextField()
+    category = models.CharField(max_length=50, choices=QUESTION_CATEGORIES, default='Security')
+    is_mandatory = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.vendor_type} - {self.question_text}"
-
 
 # 🔹 Vendor Response Model
 class VendorResponse(models.Model):
@@ -61,13 +78,13 @@ class VendorResponse(models.Model):
     response = models.CharField(max_length=255, choices=[
         ('Yes', 'Yes'),
         ('No', 'No'),
-        ('Partial', 'Partial')
+        ('Partial', 'Partial'),
+        ('N/A', 'N/A')
     ])
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.vendor.name} - {self.question.question_text[:50]}"
-
 
 # 🔹 Risk Assessment Model
 class RiskAssessment(models.Model):
@@ -82,3 +99,12 @@ class RiskAssessment(models.Model):
     def __str__(self):
         return f"{self.vendor.name} - {self.assessment_date}"
 
+# 🔹 Onboarding Questionnaire Model
+class OnboardingQuestionnaire(models.Model):
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='onboarding_questions')
+    question_text = models.TextField()
+    is_mandatory = models.BooleanField(default=True)
+    response = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.vendor.name} - Onboarding Question"

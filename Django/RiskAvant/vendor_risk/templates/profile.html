@@ -1,0 +1,35 @@
+
+<!--  profile.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - RiskAvant</title>
+    {% load static %}
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="profile-container">
+        <h2>User Profile</h2>
+        <div class="profile-info">
+            <p><strong>Username:</strong> {{ username }}</p>
+            <p><strong>Email:</strong> {{ email }}</p>
+            <p><strong>Organization Name:</strong> {{ organization_name }}</p>
+            <p><strong>Role:</strong> {{ role }}</p>
+        </div>
+        <div class="profile-actions">
+            <form method="post" action="{% url 'onboarding' user.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Start Onboarding</button>
+            </form>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="profile_picture">Upload Profile Picture:</label>
+                <input type="file" name="profile_picture" id="profile_picture">
+                <button type="submit" class="btn btn-secondary">Upload</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
