@@ -14,13 +14,14 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
-    organization_name = models.CharField(max_length=255, blank=True, null=True)  # Added organization name field
+    organization_name = models.CharField(max_length=255, blank=True, null=True)
     
     def __str__(self):
         return f"{self.username} - ({self.role})"
 
 # 🔹 Vendor Model
 class Vendor(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="vendor_profile", blank=True, null=True)
     VENDOR_TYPES = [
         ('Cloud Service Provider', 'Cloud Service Provider'), 
         ('Software Vendor', 'Software Vendor'), 
@@ -37,10 +38,19 @@ class Vendor(models.Model):
     tax_id = models.CharField(max_length=50, blank=True, null=True)
     business_license = models.CharField(max_length=50, blank=True, null=True)
     years_in_operation = models.IntegerField(blank=True, null=True)
-    certifications = models.JSONField(blank=True, null=True)  # Store as JSON list
+    num_employees = models.CharField(max_length=20, choices=[
+        ('1-10', '1-10'), ('11-50', '11-50'), ('51-200', '51-200'),
+        ('201-500', '201-500'), ('501+', '501+')
+    ], blank=True, null=True)
+    num_clients = models.IntegerField(blank=True, null=True)
+    annual_revenue = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    certifications = models.TextField(blank=True, null=True)
+    certified = models.BooleanField(default=False)
+    auditable = models.BooleanField(default=False)
     insurance_coverage = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    submitted_at = models.DateTimeField(default=now)
 
     def __str__(self):
         return self.name

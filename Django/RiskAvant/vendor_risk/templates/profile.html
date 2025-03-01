@@ -1,5 +1,4 @@
-
-<!--  profile.html-->
+<!-- profile.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +7,76 @@
     <title>User Profile - RiskAvant</title>
     {% load static %}
     <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        body {
+            background-color: #ECEFF1;
+            color: #37474F;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        .profile-container {
+            width: 60%;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #263238;
+            font-weight: 700;
+        }
+        .profile-info p {
+            font-size: 16px;
+            color: #555;
+            margin: 10px 0;
+        }
+        strong {
+            color: #222;
+        }
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #26A69A 0%, #00897B 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #00897B 0%, #00695C 100%);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #78909C 0%, #607D8B 100%);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #607D8B 0%, #546E7A 100%);
+        }
+        input[type="file"] {
+            margin-left: 10px;
+            padding: 8px;
+            border: 1px solid #CFD8DC;
+            border-radius: 6px;
+            background-color: #F5F7FA;
+            transition: border-color 0.3s;
+        }
+        input[type="file"]:focus {
+            border-color: #26A69A;
+            outline: none;
+        }
+    </style>
 </head>
 <body>
     <div class="profile-container">
@@ -15,7 +84,7 @@
         <div class="profile-info">
             <p><strong>Username:</strong> {{ username }}</p>
             <p><strong>Email:</strong> {{ email }}</p>
-            <p><strong>Organization Name:</strong> {{ organization_name }}</p>
+            <p><strong>Organization Name:</strong> {{ organization_name|default:'None' }}</p>
             <p><strong>Role:</strong> {{ role }}</p>
         </div>
         <div class="profile-actions">

@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.password_validation import password_validators_help_texts
 from django.utils.safestring import mark_safe
-from .models import CustomUser
+from .models import CustomUser, Vendor
 
 password_help_text = mark_safe('<br>'.join(password_validators_help_texts()))
 
@@ -70,3 +70,41 @@ class SignUpForm(UserCreationForm):
             user.save()
         
         return user
+
+# Vendor Onboarding Form
+class VendorOnboardingForm(forms.ModelForm):
+    class Meta:
+        model = Vendor
+        fields = [
+            'name', 'vendor_type', 'contact_email', 'contact_phone', 'address',
+            'website', 'tax_id', 'business_license', 'years_in_operation',
+            'num_employees', 'num_clients', 'annual_revenue', 'certifications',
+            'certified', 'auditable', 'insurance_coverage'
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'Enter company name'}),
+            'contact_email': forms.EmailInput(attrs={'placeholder': 'Enter contact email'}),
+            'contact_phone': forms.TextInput(attrs={'placeholder': 'Enter contact phone'}),
+            'address': forms.Textarea(attrs={'placeholder': 'Enter company address', 'rows': 3}),
+            'website': forms.URLInput(attrs={'placeholder': 'Enter website URL'}),
+            'tax_id': forms.TextInput(attrs={'placeholder': 'Enter tax ID'}),
+            'business_license': forms.TextInput(attrs={'placeholder': 'Enter business license'}),
+            'years_in_operation': forms.NumberInput(attrs={'min': 0, 'placeholder': 'Years in operation'}),
+            'num_clients': forms.NumberInput(attrs={'min': 0, 'placeholder': 'Number of clients worked with'}),
+            'annual_revenue': forms.NumberInput(attrs={'min': 0, 'step': '0.01', 'placeholder': 'Annual revenue in USD'}),
+            'certifications': forms.Textarea(attrs={'placeholder': 'Enter certifications (comma-separated)', 'rows': 2}),
+            'insurance_coverage': forms.Textarea(attrs={'placeholder': 'Enter insurance coverage details', 'rows': 3}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        num_clients = cleaned_data.get('num_clients')
+        annual_revenue = cleaned_data.get('annual_revenue')
+        
+        if num_clients is not None and num_clients < 0:
+            self.add_error('num_clients', 'Number of clients cannot be negative.')
+        
+        if annual_revenue is not None and annual_revenue < 0:
+            self.add_error('annual_revenue', 'Annual revenue cannot be negative.')
+        
+        return cleaned_data

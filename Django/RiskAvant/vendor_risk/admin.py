@@ -10,10 +10,12 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = UserAdmin.add_fieldsets + (
         ('Additional Info', {'fields': ('role',)}),
     )
+
 @admin.register(Vendor)
 class VendorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'vendor_type', 'contact_email', 'contact_phone', 'created_at')
-    search_fields = ('name', 'vendor_type', 'contact_email')
+    list_display = ('user', 'name', 'vendor_type', 'contact_email', 'contact_phone', 'submitted_at')
+    search_fields = ('name', 'vendor_type', 'contact_email', 'user__username')
+    list_filter = ('vendor_type', 'submitted_at')
 
 @admin.register(Questionnaire)
 class QuestionnaireAdmin(admin.ModelAdmin):
@@ -29,4 +31,3 @@ class VendorResponseAdmin(admin.ModelAdmin):
 class RiskAssessmentAdmin(admin.ModelAdmin):
     list_display = ('vendor', 'assessment_date', 'risk_score', 'compliance_status', 'created_at')
     search_fields = ('vendor__name', 'compliance_status')
-
