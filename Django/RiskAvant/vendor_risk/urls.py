@@ -1,15 +1,17 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.login_view, name='login'),
+    path('home/', views.home, name='home'),
     path('logout/', views.logout_view, name='logout'),
-    path('login/', views.login_view, name='login'),
     path('signup/', views.signup_view, name='signup'),
-    path('onboarding/<int:user_id>/', views.onboarding, name='onboarding'),
+    path('onboarding/<int:user_id>/', views.vendor_onboarding, name='onboarding'),
     path('profile/', views.profile, name='profile'),
     path('vendors/', views.vendor_list, name='vendor-list'),
     path('vendors/<int:vendor_id>/risk/', views.risk_assessment, name='vendor-risk'),
+    
     # New routes for additional features
     path('alerts/', views.alerts, name='alerts'),
     path('settings/', views.settings, name='settings'),
@@ -18,4 +20,12 @@ urlpatterns = [
     path('checklist-list/', views.checklist_list, name='checklist-list'),
     path('compliance/', views.compliance, name='compliance'),
     path('audit-log/', views.audit_log, name='audit-log'),
+    path('terms/', views.terms, name='terms'),
+    path('questionnaire/', views.generate_questionnaire, name='questionnaire'),
+    
+    # Password Reset URLs
+    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='password_reset.html'), name='password_reset'),
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'), name='password_reset_done'),
+    path('password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'), name='password_reset_confirm'),
+    path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
 ]

@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.password_validation import password_validators_help_texts
 from django.utils.safestring import mark_safe
-from .models import CustomUser, Vendor
+from .models import CustomUser, Vendor, Certification
 
 password_help_text = mark_safe('<br>'.join(password_validators_help_texts()))
 
@@ -21,7 +21,7 @@ class SignUpForm(UserCreationForm):
     password1 = forms.CharField(
         label="Password",
         widget=forms.PasswordInput(attrs={'placeholder': 'Enter a password'}),
-        help_text=password_help_text,  # Now formatted properly
+        help_text="",
     )
 
     class Meta:
@@ -38,7 +38,7 @@ class SignUpForm(UserCreationForm):
         }
         error_messages = {
             'username': {
-                'required': 'Please enter a username.',
+                'required': '',
                 'unique': 'This username is already taken.',
             },
             'password2': {
@@ -61,50 +61,52 @@ class SignUpForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.role = 'User'  # Set default role
+        user.role = 'User'
         user.first_name = self.cleaned_data.get('first_name', '')
         user.last_name = self.cleaned_data.get('last_name', '')
         user.organization_name = self.cleaned_data['organization_name']
-        
+
         if commit:
             user.save()
-        
+
         return user
 
-# Vendor Onboarding Form
 class VendorOnboardingForm(forms.ModelForm):
+    certified = forms.ChoiceField(
+        choices=[("yes", "Yes"), ("no", "No")],
+        widget=forms.RadioSelect(attrs={'id': 'certified-radio'}),
+        label="Do you have certifications?"
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        print("Certifications in Form:", list(Certification.objects.values_list('name', flat=True)))
+        self.fields['certifications'].queryset = Certification.objects.all()
+
+    certifications = forms.ModelMultipleChoiceField(
+        queryset=Certification.objects.none(),  # Initialize as empty
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'certifications-container'}),
+        required=False,
+        )
+
     class Meta:
         model = Vendor
         fields = [
             'name', 'vendor_type', 'contact_email', 'contact_phone', 'address',
             'website', 'tax_id', 'business_license', 'years_in_operation',
-            'num_employees', 'num_clients', 'annual_revenue', 'certifications',
-            'certified', 'auditable', 'insurance_coverage'
+            'num_clients', 'annual_revenue', 'certified', 'certifications', 'auditable', 'insurance_coverage'
         ]
         widgets = {
-            'name': forms.TextInput(attrs={'placeholder': 'Enter company name'}),
-            'contact_email': forms.EmailInput(attrs={'placeholder': 'Enter contact email'}),
-            'contact_phone': forms.TextInput(attrs={'placeholder': 'Enter contact phone'}),
-            'address': forms.Textarea(attrs={'placeholder': 'Enter company address', 'rows': 3}),
-            'website': forms.URLInput(attrs={'placeholder': 'Enter website URL'}),
-            'tax_id': forms.TextInput(attrs={'placeholder': 'Enter tax ID'}),
-            'business_license': forms.TextInput(attrs={'placeholder': 'Enter business license'}),
-            'years_in_operation': forms.NumberInput(attrs={'min': 0, 'placeholder': 'Years in operation'}),
-            'num_clients': forms.NumberInput(attrs={'min': 0, 'placeholder': 'Number of clients worked with'}),
-            'annual_revenue': forms.NumberInput(attrs={'min': 0, 'step': '0.01', 'placeholder': 'Annual revenue in USD'}),
-            'certifications': forms.Textarea(attrs={'placeholder': 'Enter certifications (comma-separated)', 'rows': 2}),
-            'insurance_coverage': forms.Textarea(attrs={'placeholder': 'Enter insurance coverage details', 'rows': 3}),
+            'name': forms.TextInput(attrs={'placeholder': 'Enter company name', 'class': 'form-control'}),
+            'contact_email': forms.EmailInput(attrs={'placeholder': 'Enter contact email', 'class': 'form-control'}),
+            'contact_phone': forms.TextInput(attrs={'placeholder': 'Enter contact phone', 'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'placeholder': 'Enter company address', 'rows': 3, 'class': 'form-control'}),
+            'website': forms.URLInput(attrs={'placeholder': 'Enter website URL', 'class': 'form-control'}),
+            'tax_id': forms.TextInput(attrs={'placeholder': 'Enter tax ID', 'class': 'form-control'}),
+            'business_license': forms.TextInput(attrs={'placeholder': 'Enter business license', 'class': 'form-control'}),
+            'years_in_operation': forms.NumberInput(attrs={'min': 0, 'placeholder': 'Years in operation', 'class': 'form-control'}),
+            'num_clients': forms.NumberInput(attrs={'min': 0, 'placeholder': 'Number of clients worked with', 'class': 'form-control'}),
+            'annual_revenue': forms.NumberInput(attrs={'min': 0, 'step': '0.01', 'placeholder': 'Annual revenue in USD', 'class': 'form-control'}),
+            'insurance_coverage': forms.Textarea(attrs={'placeholder': 'Enter insurance coverage details', 'rows': 3, 'class': 'form-control'}),
         }
-
-    def clean(self):
-        cleaned_data = super().clean()
-        num_clients = cleaned_data.get('num_clients')
-        annual_revenue = cleaned_data.get('annual_revenue')
-        
-        if num_clients is not None and num_clients < 0:
-            self.add_error('num_clients', 'Number of clients cannot be negative.')
-        
-        if annual_revenue is not None and annual_revenue < 0:
-            self.add_error('annual_revenue', 'Annual revenue cannot be negative.')
-        
-        return cleaned_data

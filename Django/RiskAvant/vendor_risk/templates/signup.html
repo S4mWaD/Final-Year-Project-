@@ -1,92 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
     <title>Sign Up - RiskAvant</title>
     {% load static %}
-    <link rel="stylesheet" href="/static/css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Custom fonts for this template -->
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="{% static 'css/home.css' %}" rel="stylesheet">
 </head>
-<body style="background: linear-gradient(135deg, #ECEFF1 0%, #CFD8DC 100%);">
-    <div class="main-content" style="margin-left: 0; padding: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
-        <div class="card" style="width: 450px;">
-            <h2>Create an Account</h2>
-            {% if messages %}
-                <ul class="error-message" style="color: red; font-size: 14px;">
-                    {% for message in messages %}
-                        <li>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            <form id="signup-form" method="post" action="{% url 'signup' %}">
-                {% csrf_token %}
-                <div class="form-group" style="display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <label for="first_name">First Name</label>
-                        <input type="text" id="first_name" name="first_name" placeholder="Enter first name" required>
+<style>
+    .user label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .user input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .btn-primary {
+        background-color: #4e73df;
+        border: none;
+        padding: 10px;
+        font-size: 16px;
+        width: 100%;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        background-color: #2e59d9;
+    }
+
+    .custom-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .text-center a {
+        color: #4e73df;
+        text-decoration: none;
+    }
+
+    .text-center a:hover {
+        text-decoration: underline;
+    }
+
+    /* Adjust form width for better alignment */
+    .col-lg-7 {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    form.user {
+        width: 100%;
+        max-width: 400px;
+    }
+</style>
+
+<body class="bg-gradient-primary">
+    <div class="container">
+        <div class="card o-hidden border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <div class="row">
+                    <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
+                    <div class="col-lg-7">
+                        <div class="p-5">
+                            <div class="text-center">
+                                <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
+                            </div>
+                            {% if messages %}
+                            <ul class="text-danger">
+                                {% for message in messages %}
+                                <li>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                            <form class="user" method="post" action="{% url 'signup' %}">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox small">
+                                        <input type="checkbox" class="custom-control-input" id="customCheck" required>
+                                        <label class="custom-control-label" for="customCheck">I accept the <a href="{% url 'terms' %}" target="_blank">Terms and Conditions</a></label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-user btn-block">Register Account</button>
+                            </form>
+                            <hr>
+                            <div class="text-center">
+                                <a class="small" href="{% url 'password_reset' %}">Forgot Password?</a>
+                            </div>
+                            <div class="text-center">
+                                <a class="small" href="{% url 'login' %}">Already have an account? Login!</a>
+                            </div>
+                        </div>
                     </div>
-                    <div style="flex: 1;">
-                        <label for="last_name">Last Name</label>
-                        <input type="text" id="last_name" name="last_name" placeholder="Enter last name" required>
-                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="organization">Organization Name</label>
-                    <input type="text" id="organization" name="organization_name" placeholder="Enter organization name" required>
-                </div>
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Enter username" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="Enter email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password1">Password</label>
-                    <input type="password" id="password1" name="password1" placeholder="Enter password" required>
-                </div>
-                <div class="form-group">
-                    <label for="password2">Confirm Password</label>
-                    <input type="password" id="password2" name="password2" placeholder="Confirm password" required>
-                </div>
-                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="terms" name="terms" required style="width: 20px; height: 20px;">
-                    <label for="terms" style="margin: 0; font-size: 14px;">I accept the <a href="/terms" target="_blank">Terms and Conditions</a></label>
-                </div>
-                <button type="submit" class="btn btn-primary">Sign Up</button>
-            </form>
-            <p style="margin-top: 15px; font-size: 0.9em; text-align: center;">
-                Or sign up with: <br>
-                <a href="" class="btn btn-google" style="margin-top: 10px; display: inline-flex; align-items: center; gap: 8px;">
-                    Sign in with Google
-                </a>
-            </p>
-            <p style="margin-top: 15px; font-size: 0.9em; text-align: center;">
-                Already have an account? <a href="{% url 'login' %}" style="color: #1976D2; font-weight: 500;">Login</a>
-            </p>
+            </div>
         </div>
     </div>
-    <script>
-        document.getElementById("signup-form").addEventListener("submit", function(event) {
-            let requiredFields = document.querySelectorAll("#signup-form input[required]");
-            let isValid = true;
-            
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.style.border = "2px solid red";  // Highlight empty fields
-                    isValid = false;
-                } else {
-                    field.style.border = "";  // Reset border if filled
-                }
-            });
-            
-            if (!isValid) {
-                event.preventDefault();  // Prevent form submission if any required field is empty
-                alert("Please fill in all required fields.");
-            }
-        });
-    </script>
+    <!-- Bootstrap core JavaScript -->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+    <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
 </body>
 </html>
