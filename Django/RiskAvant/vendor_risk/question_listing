@@ -38,6 +38,7 @@ Do you have environmental controls (e.g., HVAC, fire suppression) in place to pr
 Are backup power systems, such as UPS and generators, implemented to ensure continuity?​
 Do you conduct regular audits of physical security controls within the data center?​
 Is there a documented disaster recovery plan specific to data center operations?​
+
 Other:
 
 Do you have policies addressing mobile device security within your organization?​
@@ -45,6 +46,7 @@ Is there a process for managing and securing remote access to your systems?​
 Do you conduct regular audits of third-party service providers for compliance with security standards?​
 Are data privacy policies in place to comply with applicable regulations?​
 Do you have a business continuity plan that includes cybersecurity considerations?​
+
 Certifications:
 
 ISO 27001:
@@ -54,6 +56,7 @@ Do you conduct regular internal audits of your Information Security Management S
 Is there a process for continuous improvement of your ISMS?​
 Do you perform regular risk assessments in line with ISO 27001 requirements?​
 Are information security policies communicated effectively across the organization?​
+
 GDPR:
 
 Do you have processes to ensure compliance with the General Data Protection Regulation (GDPR)?​
@@ -61,6 +64,7 @@ Is there a designated Data Protection Officer (DPO) within your organization?​
 Do you conduct regular data protection impact assessments?​
 Are procedures in place to handle data subject access requests within the stipulated timeframe?​
 Do you have protocols for reporting data breaches to the relevant supervisory authority within 72 hours?​
+
 SOC 2 Type II:
 
 Have you undergone a SOC 2 Type II audit in the past 12 months?​
@@ -68,6 +72,7 @@ Do you monitor and document the effectiveness of your internal controls continuo
 Are there policies ensuring the security, availability, and confidentiality of customer data?​
 Do you provide SOC 2 Type II reports to clients upon request?​
 Is there a process for addressing and remediating deficiencies identified in SOC 2 audits?​
+
 PCI DSS:
 
 Are you compliant with the Payment Card Industry Data Security Standard (PCI DSS)?​
@@ -75,6 +80,7 @@ Do you conduct quarterly vulnerability scans as required by PCI DSS?​
 Is cardholder data encrypted during transmission over public networks?​
 Do you maintain a policy that addresses information security for employees and contractors?​
 Are access controls in place to restrict user access to cardholder data on a need-to-know basis?​
+
 HIPAA:
 
 Do you have policies and procedures to ensure compliance with the Health Insurance Portability and Accountability Act (HIPAA)?​

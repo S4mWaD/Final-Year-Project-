@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.password_validation import password_validators_help_texts
 from django.utils.safestring import mark_safe
-from .models import CustomUser, Vendor, Certification
+from .models import CustomUser, Vendor, Certification, SecurityChecklist, QuestionnaireRules
 
 password_help_text = mark_safe('<br>'.join(password_validators_help_texts()))
 
@@ -80,15 +80,13 @@ class VendorOnboardingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        print("Certifications in Form:", list(Certification.objects.values_list('name', flat=True)))
         self.fields['certifications'].queryset = Certification.objects.all()
 
     certifications = forms.ModelMultipleChoiceField(
         queryset=Certification.objects.none(),  # Initialize as empty
         widget=forms.CheckboxSelectMultiple(attrs={'id': 'certifications-container'}),
         required=False,
-        )
+    )
 
     class Meta:
         model = Vendor
@@ -109,4 +107,25 @@ class VendorOnboardingForm(forms.ModelForm):
             'num_clients': forms.NumberInput(attrs={'min': 0, 'placeholder': 'Number of clients worked with', 'class': 'form-control'}),
             'annual_revenue': forms.NumberInput(attrs={'min': 0, 'step': '0.01', 'placeholder': 'Annual revenue in USD', 'class': 'form-control'}),
             'insurance_coverage': forms.Textarea(attrs={'placeholder': 'Enter insurance coverage details', 'rows': 3, 'class': 'form-control'}),
+        }
+
+class SecurityChecklistForm(forms.ModelForm):
+    class Meta:
+        model = SecurityChecklist
+        fields = ['question', 'response']
+        widgets = {
+            'question': forms.Textarea(attrs={'readonly': 'readonly', 'rows': 2, 'class': 'form-control'}),
+            'response': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+        }
+
+class QuestionnaireRulesForm(forms.ModelForm):
+    class Meta:
+        model = QuestionnaireRules
+        fields = ['vendor_type', 'requires_certification', 'min_employees', 'max_employees', 'category']
+        widgets = {
+            'vendor_type': forms.Select(attrs={'class': 'form-control'}),
+            'requires_certification': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'min_employees': forms.NumberInput(attrs={'min': 0, 'class': 'form-control'}),
+            'max_employees': forms.NumberInput(attrs={'min': 0, 'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
         }

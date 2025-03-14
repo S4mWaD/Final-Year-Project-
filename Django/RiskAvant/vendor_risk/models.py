@@ -109,10 +109,73 @@ class OnboardingQuestionnaire(models.Model):
         return f"[{self.category}] {self.question_text}"
 
 # 🛡️ Vendor Response Model
+
+class SecurityChecklist(models.Model):
+    CATEGORY_CHOICES = [
+        ('Cloud Security', 'Cloud Security'),
+        ('Network and Infrastructure', 'Network and Infrastructure'),
+        ('Cybersecurity', 'Cybersecurity'),
+        ('Software Development', 'Software Development'),
+        ('Data Center', 'Data Center'),
+        ('Other', 'Other'),
+        ('Certifications', 'Certifications'),
+    ]
+
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+    ]
+
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='security_checklists')
+    category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
+    question = models.TextField()
+    response = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # 🛡️ Questionnaire Rules Model
+class QuestionnaireRules(models.Model):
+    vendor_type = models.CharField(max_length=50, choices=Vendor.VENDOR_TYPES)
+    requires_certification = models.BooleanField(default=False)
+    min_employees = models.PositiveIntegerField(default=0)
+    max_employees = models.PositiveIntegerField(default=10000)
+    category = models.CharField(max_length=50, choices=OnboardingQuestionnaire.QUESTION_CATEGORIES)
+
+    def __str__(self):
+        return f"Rule for {self.vendor_type} - {self.category}"
+
+class QuestionBank(models.Model):
+    QUESTION_CATEGORIES = [
+        ('General', 'General'),
+        ('Technical', 'Technical'),
+        ('Compliance', 'Compliance'),
+        ('Legal', 'Legal'),
+        ('Operational', 'Operational')
+    ]
+    
+    category = models.CharField(max_length=50, choices=QUESTION_CATEGORIES, default='General')
+    question_text = models.TextField()
+    vendor_type = models.CharField(max_length=50, choices=Vendor.VENDOR_TYPES, default='Other')
+    required_certifications = models.ManyToManyField("Certification", blank=True)
+    requires_mfa = models.BooleanField(default=False)
+    cloud_requirement = models.CharField(max_length=50, choices=[
+        ('Public Cloud', 'Public Cloud'),
+        ('Private Cloud', 'Private Cloud'),
+        ('Hybrid Cloud', 'Hybrid Cloud'),
+        ('No Cloud', 'No Cloud')
+    ], blank=True, null=True)
+    min_employees = models.PositiveIntegerField(default=0)
+    max_employees = models.PositiveIntegerField(default=10000)
+
+    def __str__(self):
+        return f"[{self.category}] {self.question_text[:50]}..."
+
 class VendorResponse(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='responses')
-    question = models.ForeignKey(OnboardingQuestionnaire, on_delete=models.CASCADE, related_name='responses')
+    question = models.ForeignKey(QuestionBank, on_delete=models.CASCADE, related_name='responses')  
     response = models.CharField(max_length=255, choices=[
+        
         ('Yes', 'Yes'),
         ('No', 'No'),
         ('Partial', 'Partial'),

@@ -3,8 +3,8 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import CustomUser, Vendor, RiskAssessment, Certification, SecurityProfile
-from .forms import SignUpForm, VendorOnboardingForm
+from .models import CustomUser, Vendor, RiskAssessment, Certification, SecurityProfile, SecurityChecklist, QuestionnaireRules, OnboardingQuestionnaire, VendorResponse,QuestionBank
+from .forms import SignUpForm, VendorOnboardingForm, SecurityChecklistForm
 
 User = get_user_model()
 
@@ -70,28 +70,57 @@ def vendor_onboarding(request, user_id):
         form = VendorOnboardingForm(request.POST, instance=vendor)
         if form.is_valid():
             vendor = form.save(commit=False)
-
-            # Check if certifications should be cleared
             if form.cleaned_data["certified"] == "no":
                 vendor.certifications.clear()
             else:
                 vendor.save()
-                form.save_m2m()  # Save many-to-many field data
-            
+                form.save_m2m()
             messages.success(request, 'Vendor onboarded successfully!')
-            return redirect('home')  # Redirect to home/dashboard after success
+            return redirect('home')
     else:
         form = VendorOnboardingForm(instance=vendor, initial={'certified': vendor.certified})
 
-    return render(
-        request,
-        'onboarding.html',
-        {
-            'user_role': request.user.role,
-            'form': form,
-            'user': user,
-        }
-    )
+    return render(request, 'onboarding.html', {'user_role': request.user.role, 'form': form, 'user': user})
+
+# Security Questionnaire Generation
+@login_required
+def generate_questionnaire(request):
+    vendor = Vendor.objects.get(user=request.user)
+
+    # Step 1: Fetch all questions that match the vendor type
+    assigned_questions = VendorResponse.objects.filter(vendor=vendor)
+
+    if not assigned_questions.exists():
+        relevant_questions = QuestionBank.objects.filter(
+            vendor_type=vendor.vendor_type,
+            min_employees__lte=vendor.num_clients,
+            max_employees__gte=vendor.num_clients
+        )
+
+        # Step 2: Filter by certifications (if applicable)
+        if vendor.certified == "yes":
+            relevant_questions = relevant_questions.filter(
+                required_certifications__in=vendor.certifications.all()
+            )
+
+        # Step 3: Filter by MFA or other security factors (if applicable)
+        if hasattr(vendor, 'security_profile'):
+            security_profile = vendor.security_profile
+            if security_profile.mfa:
+                relevant_questions = relevant_questions.filter(requires_mfa=True)
+
+        # 🚀 Ensure at least some questions are assigned
+        if not relevant_questions.exists():
+            relevant_questions = QuestionBank.objects.all()[:5]  # Assign any 5 questions as a fallback
+
+        # Step 4: Assign the filtered questions to VendorResponse
+        for question in relevant_questions:
+            VendorResponse.objects.get_or_create(vendor=vendor, question=question, response='N/A')
+
+    assigned_questions = VendorResponse.objects.filter(vendor=vendor)
+
+    return render(request, 'questionnaire.html', {'form_list': assigned_questions})
+
 
 # Other Views
 @login_required
@@ -140,6 +169,3 @@ def risk_assessment(request):
 
 def terms(request):
     return render(request, 'terms.html')
-
-def generate_questionnaire(request):
-    return render(request, 'questionnaire.html')

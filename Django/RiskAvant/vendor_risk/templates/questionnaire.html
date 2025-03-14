@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Questionnaire</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Security Questionnaire</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="accordion" id="questionnaireAccordion">
+            {% for question in form_list %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#collapse{{ forloop.counter }}" 
+                        aria-expanded="false" 
+                        aria-controls="collapse{{ forloop.counter }}">
+                        {{ question.question.category }} - Question {{ forloop.counter }}
+                    </button>
+                </h2>
+                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" 
+                    aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#questionnaireAccordion">
+                    <div class="accordion-body">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Question:</strong></label>
+                            <p>{{ question.question.question_text }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Your Response:</strong></label>
+                            <select name="response_{{ question.id }}" class="form-select">
+                                <option value="Yes" {% if question.response == "Yes" %}selected{% endif %}>Yes</option>
+                                <option value="No" {% if question.response == "No" %}selected{% endif %}>No</option>
+                                <option value="Partial" {% if question.response == "Partial" %}selected{% endif %}>Partial</option>
+                                <option value="N/A" {% if question.response == "N/A" %}selected{% endif %}>N/A</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-danger">No questions available for this vendor.</p>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">Submit Responses</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
