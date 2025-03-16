@@ -14,46 +14,143 @@
 
     <form method="post">
         {% csrf_token %}
+
+        <!-- Grouped Security Questionnaire Sections -->
         <div class="accordion" id="questionnaireAccordion">
-            {% for question in form_list %}
+
+            <!-- General & Legal Questions -->
             <div class="accordion-item">
-                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                        data-bs-target="#collapse{{ forloop.counter }}" 
-                        aria-expanded="false" 
-                        aria-controls="collapse{{ forloop.counter }}">
-                        {{ question.question.category }} - Question {{ forloop.counter }}
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#generalLegalSection" aria-expanded="true" aria-controls="generalLegalSection">
+                        General & Legal Questions
                     </button>
                 </h2>
-                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" 
-                    aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#questionnaireAccordion">
+                <div id="generalLegalSection" class="accordion-collapse collapse show">
                     <div class="accordion-body">
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Question:</strong></label>
-                            <p>{{ question.question.question_text }}</p>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Your Response:</strong></label>
-                            <select name="response_{{ question.id }}" class="form-select">
-                                <option value="Yes" {% if question.response == "Yes" %}selected{% endif %}>Yes</option>
-                                <option value="No" {% if question.response == "No" %}selected{% endif %}>No</option>
-                                <option value="Partial" {% if question.response == "Partial" %}selected{% endif %}>Partial</option>
-                                <option value="N/A" {% if question.response == "N/A" %}selected{% endif %}>N/A</option>
-                            </select>
+                        <div class="accordion" id="generalLegalAccordion">
+                            {% for question in form_list %}
+                                {% if question.question.category in "General Legal" %}
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
+                                                aria-controls="collapse{{ forloop.counter }}">
+                                                {{ question.question.question_text }}
+                                            </button>
+                                        </h2>
+                                        <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse"
+                                            aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#generalLegalAccordion">
+                                            <div class="accordion-body">
+                                                <label class="form-label"><strong>Question:</strong></label>
+                                                <p>{{ question.question.question_text }}</p>
+                                                <label class="form-label"><strong>Your Response:</strong></label>
+                                                <select name="response_{{ question.id }}" class="form-select">
+                                                    <option value="Yes" {% if question.response == "Yes" %}selected{% endif %}>Yes</option>
+                                                    <option value="No" {% if question.response == "No" %}selected{% endif %}>No</option>
+                                                    <option value="Partial" {% if question.response == "Partial" %}selected{% endif %}>Partial</option>
+                                                    <option value="N/A" {% if question.response == "N/A" %}selected{% endif %}>N/A</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
-            {% empty %}
-            <p class="text-center text-danger">No questions available for this vendor.</p>
-            {% endfor %}
-        </div>
 
+            <!-- Compliance Questions -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#complianceSection" aria-expanded="false" aria-controls="complianceSection">
+                        Compliance Questions
+                    </button>
+                </h2>
+                <div id="complianceSection" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <div class="accordion" id="complianceAccordion">
+                            {% for question in form_list %}
+                                {% if question.question.category == "Compliance" %}
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
+                                                aria-controls="collapse{{ forloop.counter }}">
+                                                {{ question.question.question_text }}
+                                            </button>
+                                        </h2>
+                                        <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse"
+                                            aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#complianceAccordion">
+                                            <div class="accordion-body">
+                                                <label class="form-label"><strong>Question:</strong></label>
+                                                <p>{{ question.question.question_text }}</p>
+                                                <label class="form-label"><strong>Your Response:</strong></label>
+                                                <select name="response_{{ question.id }}" class="form-select">
+                                                    <option value="Yes" {% if question.response == "Yes" %}selected{% endif %}>Yes</option>
+                                                    <option value="No" {% if question.response == "No" %}selected{% endif %}>No</option>
+                                                    <option value="Partial" {% if question.response == "Partial" %}selected{% endif %}>Partial</option>
+                                                    <option value="N/A" {% if question.response == "N/A" %}selected{% endif %}>N/A</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Questions -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#technicalSection" aria-expanded="false" aria-controls="technicalSection">
+                        Technical Questions
+                    </button>
+                </h2>
+                <div id="technicalSection" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <div class="accordion" id="technicalAccordion">
+                            {% for question in form_list %}
+                                {% if question.question.category == "Technical" %}
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
+                                                aria-controls="collapse{{ forloop.counter }}">
+                                                {{ question.question.question_text }}
+                                            </button>
+                                        </h2>
+                                        <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse"
+                                            aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#technicalAccordion">
+                                            <div class="accordion-body">
+                                                <label class="form-label"><strong>Question:</strong></label>
+                                                <p>{{ question.question.question_text }}</p>
+                                                <label class="form-label"><strong>Your Response:</strong></label>
+                                                <select name="response_{{ question.id }}" class="form-select">
+                                                    <option value="Yes" {% if question.response == "Yes" %}selected{% endif %}>Yes</option>
+                                                    <option value="No" {% if question.response == "No" %}selected{% endif %}>No</option>
+                                                    <option value="Partial" {% if question.response == "Partial" %}selected{% endif %}>Partial</option>
+                                                    <option value="N/A" {% if question.response == "N/A" %}selected{% endif %}>N/A</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="text-center mt-4">
             <button type="submit" class="btn btn-primary">Submit Responses</button>
         </div>
     </form>
 </div>
-
 </body>
 </html>

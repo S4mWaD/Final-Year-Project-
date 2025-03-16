@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Vendor, RiskAssessment, Certification, SecurityProfile
+from .models import CustomUser, Vendor, RiskAssessment, Certification, SecurityProfile, QuestionBank
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -27,3 +27,10 @@ class CertificationAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
     ordering = ('name',)
+
+@admin.register(QuestionBank)
+class QuestionBankAdmin(admin.ModelAdmin):
+    list_display = ('question_text', 'vendor_type')
+    search_fields = ('question_text', 'vendor_type')
+    ordering = ('question_text',)
+    

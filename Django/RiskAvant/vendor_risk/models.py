@@ -156,20 +156,37 @@ class QuestionBank(models.Model):
     
     category = models.CharField(max_length=50, choices=QUESTION_CATEGORIES, default='General')
     question_text = models.TextField()
-    vendor_type = models.CharField(max_length=50, choices=Vendor.VENDOR_TYPES, default='Other')
+    vendor_type = models.CharField(
+        max_length=50,
+        choices=Vendor.VENDOR_TYPES,
+        blank=True,  # ✅ Allows empty values only for General & Legal
+        null=True
+    )
     required_certifications = models.ManyToManyField("Certification", blank=True)
     requires_mfa = models.BooleanField(default=False)
-    cloud_requirement = models.CharField(max_length=50, choices=[
-        ('Public Cloud', 'Public Cloud'),
-        ('Private Cloud', 'Private Cloud'),
-        ('Hybrid Cloud', 'Hybrid Cloud'),
-        ('No Cloud', 'No Cloud')
-    ], blank=True, null=True)
+    cloud_requirement = models.CharField(
+        max_length=50,
+        choices=[
+            ('Public Cloud', 'Public Cloud'),
+            ('Private Cloud', 'Private Cloud'),
+            ('Hybrid Cloud', 'Hybrid Cloud'),
+            ('No Cloud', 'No Cloud')
+        ],
+        blank=True,
+        null=True
+    )
     min_employees = models.PositiveIntegerField(default=0)
     max_employees = models.PositiveIntegerField(default=10000)
 
+    def save(self, *args, **kwargs):
+        """ Ensure vendor_type is required for non-General/Legal categories """
+        if self.category not in ["General", "Legal"] and not self.vendor_type:
+            raise ValueError("Vendor type is required for non-General/Legal questions.")
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"[{self.category}] {self.question_text[:50]}..."
+
 
 class VendorResponse(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='responses')

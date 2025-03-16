@@ -82,44 +82,78 @@ def vendor_onboarding(request, user_id):
 
     return render(request, 'onboarding.html', {'user_role': request.user.role, 'form': form, 'user': user})
 
-# Security Questionnaire Generation
+# Security Questionnaire Generation@login_required
+from itertools import chain
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Vendor, VendorResponse, QuestionBank
+
 @login_required
 def generate_questionnaire(request):
-    vendor = Vendor.objects.get(user=request.user)
+    vendor = get_object_or_404(Vendor, user=request.user)
 
-    # Step 1: Fetch all questions that match the vendor type
+    # Handle form submission
+    if request.method == "POST":
+        for key, value in request.POST.items():
+            if key.startswith("response_"):
+                response_id = key.split("_")[1]  # Extract question ID
+                vendor_response = get_object_or_404(VendorResponse, id=response_id)
+                vendor_response.response = value
+                vendor_response.save()
+        messages.success(request, "Responses submitted successfully!")
+        return redirect("generate_questionnaire")
+
+    # Fetch all assigned questions for this vendor
     assigned_questions = VendorResponse.objects.filter(vendor=vendor)
 
+    # Fetch General & Legal questions missing from the vendor
+    missing_general_legal_questions = QuestionBank.objects.filter(
+        category__in=["General", "Legal"], 
+        vendor_type__isnull=True
+    ).exclude(id__in=assigned_questions.values_list("question__id", flat=True))
+
+    # Assign missing General & Legal questions
+    for question in missing_general_legal_questions:
+        VendorResponse.objects.get_or_create(vendor=vendor, question=question, defaults={"response": "N/A"})
+
     if not assigned_questions.exists():
-        relevant_questions = QuestionBank.objects.filter(
+        # ✅ Fetch vendor-specific questions
+        vendor_specific_questions = QuestionBank.objects.filter(
             vendor_type=vendor.vendor_type,
             min_employees__lte=vendor.num_clients,
             max_employees__gte=vendor.num_clients
-        )
+        ).distinct()
 
-        # Step 2: Filter by certifications (if applicable)
+        # ✅ Fetch General & Legal questions (which apply to all vendors)
+        general_legal_questions = QuestionBank.objects.filter(
+            category__in=["General", "Legal"], 
+            vendor_type__isnull=True
+        ).distinct()
+
+        # ✅ Merge without using union()
+        relevant_questions = list(chain(vendor_specific_questions, general_legal_questions))
+
+        # ✅ Preserve General & Legal questions during filtering
         if vendor.certified == "yes":
-            relevant_questions = relevant_questions.filter(
-                required_certifications__in=vendor.certifications.all()
-            )
+            relevant_questions = [q for q in relevant_questions if 
+                q.required_certifications.filter(id__in=vendor.certifications.values_list("id", flat=True)).exists()
+            ] + list(general_legal_questions)
 
-        # Step 3: Filter by MFA or other security factors (if applicable)
-        if hasattr(vendor, 'security_profile'):
-            security_profile = vendor.security_profile
-            if security_profile.mfa:
-                relevant_questions = relevant_questions.filter(requires_mfa=True)
+        if hasattr(vendor, "security_profile") and vendor.security_profile.mfa:
+            relevant_questions = [q for q in relevant_questions if q.requires_mfa] + list(general_legal_questions)
 
-        # 🚀 Ensure at least some questions are assigned
-        if not relevant_questions.exists():
-            relevant_questions = QuestionBank.objects.all()[:5]  # Assign any 5 questions as a fallback
+        # ✅ Assign all relevant questions in VendorResponse
+        for question in set(relevant_questions):  # Ensures uniqueness
+            VendorResponse.objects.get_or_create(vendor=vendor, question=question, defaults={"response": "N/A"})
 
-        # Step 4: Assign the filtered questions to VendorResponse
-        for question in relevant_questions:
-            VendorResponse.objects.get_or_create(vendor=vendor, question=question, response='N/A')
-
+    # Fetch assigned questions again for display
     assigned_questions = VendorResponse.objects.filter(vendor=vendor)
 
-    return render(request, 'questionnaire.html', {'form_list': assigned_questions})
+    return render(request, "questionnaire.html", {"form_list": assigned_questions})
+
+
+
 
 
 # Other Views
