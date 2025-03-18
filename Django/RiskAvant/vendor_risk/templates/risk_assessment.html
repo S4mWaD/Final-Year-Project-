@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>RiskAvant - Risk Assessment</title>
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
+    <link href="{% static 'css/home.css' %}" rel="stylesheet">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.username }}</span>
+                                <img class="img-profile rounded-circle" src="{% static 'img/user.png' %}">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="{% url 'profile' %}">View Profile</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="container-fluid">
+                    <h2 class="text-center mb-4">Risk Assessment Results</h2>
+                    <div class="row justify-content-center">
+                        <div class="col-lg-6">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Your Risk Score</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h3 class="font-weight-bold">{{ risk_assessment.total_risk_score }}</h3>
+                                    <p class="text-muted">Risk Level: <strong>{{ risk_assessment.risk_level }}</strong></p>
+                                    {% if risk_assessment.risk_level == "High" %}
+                                    <div class="alert alert-danger">Your risk is high. Immediate action is required.</div>
+                                    {% elif risk_assessment.risk_level == "Medium" %}
+                                    <div class="alert alert-warning">Your risk is moderate. Consider improvements.</div>
+                                    {% else %}
+                                    <div class="alert alert-success">Your risk is low. Keep maintaining best practices.</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <a href="{% url 'home' %}" class="btn btn-primary">Return to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+</body>
+</html>

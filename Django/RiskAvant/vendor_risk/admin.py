@@ -19,7 +19,7 @@ class VendorAdmin(admin.ModelAdmin):
 
 @admin.register(RiskAssessment)
 class RiskAssessmentAdmin(admin.ModelAdmin):
-    list_display = ('vendor', 'assessment_date', 'risk_score', 'compliance_status', 'created_at')
+    list_display = ('vendor', 'assessment_date', 'total_risk_score', 'compliance_status', 'created_at')
     search_fields = ('vendor__name', 'compliance_status')
 
 @admin.register(Certification)

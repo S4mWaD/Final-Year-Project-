@@ -72,6 +72,18 @@
                 </div>
                 {% endif %}
 
+                <!-- If the user has submitted questionnaire -->
+                {% if submitted_questionnaire %}
+                <div class="container-fluid">
+                    <div class="alert alert-success" role="alert">
+                        🎉 Congrats on successfully submitting your questionnaire! Find out your security status by generating your risk assessment report.
+                    </div>
+                    <div class="text-center">
+                        <a href="{% url 'risk_assessment' vendor.id %}" class="btn btn-primary">Generate Risk Assessment Report</a>
+                    </div>
+                </div>
+                {% endif %}
+
               {% if request.user.is_superuser or request.user.is_staff %}
                 <div class="container-fluid">
                     <div class="row">

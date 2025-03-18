@@ -22,6 +22,7 @@ urlpatterns = [
     path('audit-log/', views.audit_log, name='audit-log'),
     path('terms/', views.terms, name='terms'),
     path('questionnaire/', views.generate_questionnaire, name='questionnaire'),
+    path('risk_assessment/<int:vendor_id>/', views.calculate_risk, name='risk_assessment'),
     
     # Password Reset URLs
     path('password-reset/', auth_views.PasswordResetView.as_view(template_name='password_reset.html'), name='password_reset'),

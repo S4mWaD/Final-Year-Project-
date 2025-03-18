@@ -83,14 +83,15 @@ class SecurityProfile(models.Model):
 class RiskAssessment(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='risk_assessments')
     assessment_date = models.DateField(default=now)
-    risk_score = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    total_risk_score = models.IntegerField(default=0)  # ✅ Added field to store cumulative risk score
+    risk_level = models.CharField(max_length=50, choices=[('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')], default="Low")  # ✅ Added risk categorization
     compliance_status = models.CharField(max_length=50, choices=[('Compliant', 'Compliant'), ('Non-Compliant', 'Non-Compliant')], default='Non-Compliant')
     recommendations = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.vendor.name} - {self.assessment_date}"
+        return f"{self.vendor.name} - {self.total_risk_score} Risk Score" 
 
 # 🛡️ Onboarding Questionnaire Model
 class OnboardingQuestionnaire(models.Model):
@@ -111,28 +112,16 @@ class OnboardingQuestionnaire(models.Model):
 # 🛡️ Vendor Response Model
 
 class SecurityChecklist(models.Model):
-    CATEGORY_CHOICES = [
-        ('Cloud Security', 'Cloud Security'),
-        ('Network and Infrastructure', 'Network and Infrastructure'),
-        ('Cybersecurity', 'Cybersecurity'),
-        ('Software Development', 'Software Development'),
-        ('Data Center', 'Data Center'),
-        ('Other', 'Other'),
-        ('Certifications', 'Certifications'),
-    ]
-
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Completed', 'Completed'),
-    ]
-
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='security_checklists')
-    category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
     question = models.TextField()
     response = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
+    score = models.IntegerField(default=0)  # ✅ New field to store risk score per question
+    status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed')], default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Checklist for {self.vendor.name}"
 
     # 🛡️ Questionnaire Rules Model
 class QuestionnaireRules(models.Model):

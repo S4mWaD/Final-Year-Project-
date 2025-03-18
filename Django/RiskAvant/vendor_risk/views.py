@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import CustomUser, Vendor, RiskAssessment, Certification, SecurityProfile, SecurityChecklist, QuestionnaireRules, OnboardingQuestionnaire, VendorResponse,QuestionBank
 from .forms import SignUpForm, VendorOnboardingForm, SecurityChecklistForm
+from itertools import chain
 
 User = get_user_model()
 
@@ -14,15 +15,21 @@ def home(request):
     user = request.user
     vendor = Vendor.objects.filter(user=user).first()
     onboarding_complete = False
+    submitted_questionnaire = False
     
     if vendor:
         # Ensure all critical fields are filled
         required_fields = [vendor.name, vendor.contact_email, vendor.contact_phone, vendor.address]
         onboarding_complete = all(required_fields)
     
+        # check if the questionnaire is submitted
+        submitted_questionnaire = VendorResponse.objects.filter(vendor=vendor).exists()
+
     return render(request, 'home.html', {
         'user_role': user.role,
+        'vendor': vendor,
         'onboarding_complete': onboarding_complete
+        , 'submitted_questionnaire': submitted_questionnaire
     })
 
 # Login view
@@ -60,6 +67,53 @@ def logout_view(request):
     messages.success(request, 'Successfully logged out!')
     return redirect('login')
 
+@login_required
+def calculate_risk(request, vendor_id):
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    responses = VendorResponse.objects.filter(vendor=vendor)
+
+    # Define scoring system for responses
+    SCORE_MAPPING = {
+        "Yes": 0,       # No risk if best practice is followed
+        "No": 10,       # High risk if best practice is NOT followed
+        "Partial": 5,   # Medium risk if partially implemented
+        "N/A": 0        # No impact if not applicable
+    }
+
+    # Calculate total risk score by summing assigned values for each response
+    total_risk_score = sum([SCORE_MAPPING.get(response.response, 0) for response in responses])
+
+    # Assign risk level based on total score
+    if total_risk_score <= 20:
+        risk_level = "Low"
+    elif 20 < total_risk_score <= 50:
+        risk_level = "Medium"
+    else:
+        risk_level = "High"
+
+    # Update or create a RiskAssessment entry for the vendor
+    risk_assessment, created = RiskAssessment.objects.update_or_create(
+        vendor=vendor,
+        defaults={'total_risk_score': total_risk_score, 'risk_level': risk_level}
+    )
+
+    return render(request, "risk_assessment.html", {"vendor": vendor, "risk_assessment": risk_assessment})
+
+
+
+# Vendor Risk Assessment View
+@login_required
+def risk_assessment(request):
+    assessments = RiskAssessment.objects.all()
+    return render(request, 'risk_assessment.html', {'user_role': request.user.role, 'assessments': assessments})
+
+# Vendor List View
+@login_required
+def vendor_list(request):
+    vendors = Vendor.objects.all()
+    return render(request, 'vendor_list.html', {'user_role': request.user.role, 'vendors': vendors})
+
+
 # Vendor Onboarding View
 @login_required
 def vendor_onboarding(request, user_id):
@@ -83,12 +137,6 @@ def vendor_onboarding(request, user_id):
     return render(request, 'onboarding.html', {'user_role': request.user.role, 'form': form, 'user': user})
 
 # Security Questionnaire Generation@login_required
-from itertools import chain
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import Vendor, VendorResponse, QuestionBank
-
 @login_required
 def generate_questionnaire(request):
     vendor = get_object_or_404(Vendor, user=request.user)
@@ -101,8 +149,8 @@ def generate_questionnaire(request):
                 vendor_response = get_object_or_404(VendorResponse, id=response_id)
                 vendor_response.response = value
                 vendor_response.save()
-        messages.success(request, "Responses submitted successfully!")
-        return redirect("generate_questionnaire")
+        messages.success(request, "Responses submitted successfully! Please proceed with your risk assessment")
+        return redirect("home")
 
     # Fetch all assigned questions for this vendor
     assigned_questions = VendorResponse.objects.filter(vendor=vendor)
@@ -151,10 +199,6 @@ def generate_questionnaire(request):
     assigned_questions = VendorResponse.objects.filter(vendor=vendor)
 
     return render(request, "questionnaire.html", {"form_list": assigned_questions})
-
-
-
-
 
 # Other Views
 @login_required
