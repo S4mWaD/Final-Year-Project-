@@ -15,7 +15,7 @@ urlpatterns = [
     # New routes for additional features
     path('alerts/', views.alerts, name='alerts'),
     path('settings/', views.settings, name='settings'),
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/', views.admin_dashboard, name='dashboard'),
     path('risk-list/', views.risk_list, name='risk-list'),
     path('checklist-list/', views.checklist_list, name='checklist-list'),
     path('compliance/', views.compliance, name='compliance'),
@@ -23,6 +23,9 @@ urlpatterns = [
     path('terms/', views.terms, name='terms'),
     path('questionnaire/', views.generate_questionnaire, name='questionnaire'),
     path('risk_assessment/<int:vendor_id>/', views.calculate_risk, name='risk_assessment'),
+    
+    # PDF Generation Route
+    path('generate_pdf/<int:vendor_id>/', views.generate_pdf, name='generate_pdf'),
     
     # Password Reset URLs
     path('password-reset/', auth_views.PasswordResetView.as_view(template_name='password_reset.html'), name='password_reset'),

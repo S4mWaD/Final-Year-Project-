@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,6 +11,8 @@
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="{% static 'css/home.css' %}" rel="stylesheet">
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body id="page-top">
@@ -33,36 +36,96 @@
                 </nav>
 
                 <div class="container-fluid">
-                    <h2 class="text-center mb-4">Risk Assessment Results</h2>
+                    <h2 class="text-center mb-4">Risk Assessment Results for {{ vendor.name }}</h2>
                     <div class="row justify-content-center">
-                        <div class="col-lg-6">
+                        <div class="col-lg-8">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Your Risk Score</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">Overall Risk Score</h6>
                                 </div>
                                 <div class="card-body text-center">
-                                    <h3 class="font-weight-bold">{{ risk_assessment.total_risk_score }}</h3>
-                                    <p class="text-muted">Risk Level: <strong>{{ risk_assessment.risk_level }}</strong></p>
-                                    {% if risk_assessment.risk_level == "High" %}
+                                    <h3 class="font-weight-bold">{{ weighted_risk_score|floatformat:2 }}%</h3>
+                                    <p class="text-muted">Risk Level: <strong>{{ risk_level }}</strong></p>
+                                    {% if risk_level == "High" %}
                                     <div class="alert alert-danger">Your risk is high. Immediate action is required.</div>
-                                    {% elif risk_assessment.risk_level == "Medium" %}
+                                    {% elif risk_level == "Medium" %}
                                     <div class="alert alert-warning">Your risk is moderate. Consider improvements.</div>
                                     {% else %}
                                     <div class="alert alert-success">Your risk is low. Keep maintaining best practices.</div>
                                     {% endif %}
                                 </div>
                             </div>
+
+                            <!-- Chart Visualization -->
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Category-wise Risk Breakdown (Chart)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="riskChart"></canvas>
+                                </div>
+                            </div>
+
+                            
                         </div>
-                    </div>
-                    <div class="text-center">
-                        <a href="{% url 'home' %}" class="btn btn-primary">Return to Dashboard</a>
-                    </div>
+                        <div class="text-center">
+                            <a target="_blank" href="{% url 'generate_pdf' vendor.id %}"  class="btn btn-success">Generate Complete Report</a>
+                            <a href="{% url 'home' %}" class="btn btn-primary">Return to Dashboard</a>
+                        </div>
+                        
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Chart.js Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var ctx = document.getElementById('riskChart').getContext('2d');
+            var chartData = JSON.parse('{{ chart_data|safe }}');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: chartData.datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Risk Score (%)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Risk Categories'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
 </body>
+
 </html>

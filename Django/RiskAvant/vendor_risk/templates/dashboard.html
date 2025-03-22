@@ -1,0 +1,257 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>RiskAvant - Admin Dashboard</title>
+        <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
+    <link href="{% static 'css/home.css' %}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      
+    /* General Body Styling */
+    body {
+        background-color: #f8f9fc;
+        font-family: 'Nunito', sans-serif;
+        color: #4e73df;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Wrapper Styling */
+    #wrapper {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    /* Dashboard Heading */
+    .dashboard-heading {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        font-weight: bold;
+        color: #4e73df;
+        text-align: center;
+    }
+
+    /* Card Styling */
+    .card {
+        margin: 15px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        font-weight: bold;
+        font-size: 1.2rem;
+        text-align: center;
+        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+
+    .card-title {
+        font-size: 2rem;
+        text-align: center;
+        margin: 0;
+    }
+
+    .card-body {
+        text-align: center;
+        padding: 20px;
+    }
+
+    /* Chart Card Styling */
+    .chart-card {
+        margin: 20px auto;
+        padding: 20px;
+        max-width: 600px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        background-color: white;
+    }
+
+    /* Chart Canvas Styling */
+    #riskChart {
+        max-width: 300px;
+        max-height: 300px;
+        margin: 0 auto;
+        display: block;
+    }
+
+    /* Navbar Styling */
+    .navbar {
+        background-color: white;
+        padding: 10px 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Dropdown Styling */
+    .dropdown-menu {
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Profile Image Styling */
+    .img-profile {
+        height: 40px;
+        width: 40px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+</style>
+
+    </style>
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.username }}</span>
+                                <img class="img-profile rounded-circle" src="{% static 'img/user.png' %}">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="{% url 'profile' %}">View Profile</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="container-fluid">
+                    <h2 class="dashboard-heading text-center">Admin Dashboard</h2>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="card text-white bg-primary mb-3">
+                                <div class="card-header">Total Vendors</div>
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ total_vendors }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card text-white bg-success mb-3">
+                                <div class="card-header">Total Users</div>
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ total_users }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card text-white bg-warning mb-3">
+                                <div class="card-header">Total Responses</div>
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ total_responses }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card text-white bg-danger mb-3">
+                                <div class="card-header">Total Questions</div>
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ total_questions }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card text-white bg-info mb-3">
+                                <div class="card-header">Total Risk Assessments</div>
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ total_risk_assessments }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Assessment Levels -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Risk Assessment Levels</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="riskChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js Script -->
+    <script>
+        var rawData = '{{ chart_data|safe }}';
+        console.log("Raw Chart Data:", rawData);
+    
+        try {
+            if (rawData) {
+                var chartData = JSON.parse(rawData);
+                console.log("Parsed Chart Data:", chartData);
+            } else {
+                throw new Error("Empty or invalid chart data");
+            }
+        } catch (e) {
+            console.error("Error parsing chart data:", e);
+            var chartData = {
+                labels: ["Low Risk", "Medium Risk", "High Risk"],
+                datasets: [{
+                    label: "Risk Assessment Levels",
+                    data: [0, 0, 0],
+                    backgroundColor: ["#28a745", "#ffc107", "#dc3545"]
+                }]
+            };
+        }
+    
+        var ctx = document.getElementById('riskChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: chartData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: "#333"
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Risk Assessment Levels',
+                        color: "#333"
+                    }
+                }
+            }
+        });
+    </script>
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+</body>
+</html>

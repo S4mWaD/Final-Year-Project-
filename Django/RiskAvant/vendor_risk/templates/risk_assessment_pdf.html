@@ -1,0 +1,169 @@
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RiskAvant - Risk Assessment Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            color: #333;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1, h2, h3, h4, h5 {
+            text-align: center;
+            margin: 10px 0;
+            color: #333;
+        }
+        h1 {
+            font-size: 28px;
+            color: #0056b3;
+        }
+        h2 {
+            font-size: 24px;
+            margin-top: 5px;
+        }
+        h3 {
+            font-size: 20px;
+            margin-top: 15px;
+        }
+        h4, h5 {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        p, table {
+            margin: 20px auto;
+            width: 80%;
+            line-height: 1.6;
+            text-align: left;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .high-risk {
+            color: red;
+            font-weight: bold;
+        }
+        .medium-risk {
+            color: orange;
+            font-weight: bold;
+        }
+        .low-risk {
+            color: green;
+            font-weight: bold;
+        }
+        .summary {
+            margin: 20px auto;
+            text-align: left;
+            width: 80%;
+        }
+        .summary h3 {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .chart-container {
+            margin: 20px auto;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+    
+</head>
+<body>
+
+    <header>
+        <h1>RiskAvant - Risk Assessment Report</h1>
+        <h2>{{ vendor.name }}</h2>
+        <p>Generated on: <strong>{{ current_date }}</strong></p>
+    </header>
+    
+
+<section class="summary">
+    <h3>Executive Summary</h3>
+    <p>This report provides a comprehensive assessment of the risk associated with the vendor, <strong>{{ vendor.name }}</strong>.
+        The analysis evaluates various categories of risk and generates an overall risk score. The chart below provides a visual breakdown of the risk scores by category.</p>
+</section>
+
+<div class="chart-container">
+    <h3>Category-wise Risk Breakdown (Visual)</h3>
+    <img src="data:image/png;base64,{{ chart_image }}" alt="Risk Chart" width="400" height="300" />
+</div>
+
+<section>
+    <h3>Overall Risk Assessment</h3>
+    <div class="summary">
+        <h4>Overall Risk Score: <span>{{ weighted_risk_score|floatformat:2 }}%</span></h4>
+        <h4>Risk Level: 
+            {% if risk_level == "High" %}
+            <span class="high-risk">{{ risk_level }}</span>
+            {% elif risk_level == "Medium" %}
+            <span class="medium-risk">{{ risk_level }}</span>
+            {% else %}
+            <span class="low-risk">{{ risk_level }}</span>
+            {% endif %}
+        </h4>
+    </div>
+</section>
+
+<section>
+    <h3>Category-wise Risk Breakdown (Table)</h3>
+    <table>
+        <tr>
+            <th>Category</th>
+            <th>Weightage (%)</th>
+            <th>Score (%)</th>
+        </tr>
+        {% for category, score in weighted_scores.items %}
+        <tr>
+            <td>{{ category }}</td>
+            <td>{{ category_weights|get_value:category|floatformat:2 }}</td>
+            <td>{{ score|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</section>
+
+<section>
+    <h3>Detailed Questionnaire Responses</h3>
+    <table>
+        <tr>
+            <th>Question</th>
+            <th>Response</th>
+            <th>Category</th>
+        </tr>
+        {% for response in responses %}
+        <tr>
+            <td>{{ response.question.question_text }}</td>
+            <td>{{ response.response }}</td>
+            <td>{{ response.question.category }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</section>
+
+<div class="footer">
+    <p>RiskAvant - Risk Assessment Report | Confidential</p>
+    <p>&copy; {{ current_year }} RiskAvant. All Rights Reserved.</p>
+</div>
+
+</body>
+</html>
