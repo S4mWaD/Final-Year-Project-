@@ -37,6 +37,11 @@ def home(request):
         , 'submitted_questionnaire': submitted_questionnaire
     })
 
+
+# A landing page view to redirect to landing page
+def landing_page(request):
+    return render(request, 'landing.html')
+
 # Login view
 def login_view(request):
     if request.method == 'POST':

@@ -9,90 +9,183 @@
     <title>RiskAvant - Dashboard</title>
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/home.css' %}" rel="stylesheet">
 </head>
 
 <body id="page-top">
+    <!-- Page Wrapper -->
     <div id="wrapper">
+        <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'dashboard' %}">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-shield-alt"></i>
                 </div>
                 <div class="sidebar-brand-text mx-3">RiskAvant</div>
             </a>
+
+            <!-- Divider -->
             <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
                 <a class="nav-link" href="{% url 'dashboard' %}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span></a>
+                    <span>Dashboard</span>
+                </a>
             </li>
+
+            <!-- Divider -->
             <hr class="sidebar-divider">
-            <div class="sidebar-heading">Vendor Management</div>
-            <li class="nav-item"><a class="nav-link" href="{% url 'vendor-list' %}"><i class="fas fa-building"></i> Vendors</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'risk-list' %}"><i class="fas fa-exclamation-triangle"></i> Risk Assessments</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'checklist-list' %}"><i class="fas fa-list-check"></i> Checklists</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'compliance' %}"><i class="fas fa-file-contract"></i> Compliance</a></li>
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Vendor Management
+            </div>
+
+            <!-- Nav Items - Vendor Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'vendor-list' %}">
+                    <i class="fas fa-building"></i>
+                    <span>Vendors</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'risk-list' %}">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Risk Assessments</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'checklist-list' %}">
+                    <i class="fas fa-tasks"></i>
+                    <span>Checklists</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'compliance' %}">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Compliance</span>
+                </a>
+            </li>
             
             {% if request.user.is_superuser or request.user.is_staff %}
+            <!-- Divider -->
             <hr class="sidebar-divider">
-            <div class="sidebar-heading">Admin Panel</div>
-            <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="fas fa-user-cog"></i> User Management</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="fas fa-clipboard-list"></i> Audit Logs</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="fas fa-chart-line"></i> System Reports</a></li>
-            {% endif %}
-        </ul>
 
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Admin Panel
+            </div>
+
+            <!-- Nav Items - Admin -->
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">
+                    <i class="fas fa-user-cog"></i>
+                    <span>User Management</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Audit Logs</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">
+                    <i class="fas fa-chart-line"></i>
+                    <span>System Reports</span>
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline mt-3">
+                <button class="btn btn-light btn-sm" id="sidebarToggle">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
             <div id="content">
+                <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
+                        <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.username }}</span>
-                                <img class="img-profile rounded-circle" src="{% static 'img/user.png' %}">
+                                <div class="d-flex align-items-center">
+                                    <span class="mr-2 text-gray-600 small">{{ user.username }}</span>
+                                    <img class="img-profile rounded-circle" src="{% static 'img/user.png' %}">
+                                </div>
+                                
                             </a>
+                            <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="{% url 'profile' %}">View Profile</a>
+                                <a class="dropdown-item" href="{% url 'profile' %}">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Profile
+                                </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
+                                </a>
                             </div>
                         </li>
                     </ul>
                 </nav>
+                <!-- End of Topbar -->
 
-                {% if onboarding_complete %}
+                <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    <div class="alert alert-success" role="alert">
-                        🎉 Congrats on successfully onboarding! Start your security assessment by generating a questionnaire for yourself.
+                    <!-- Onboarding Alert -->
+                    {% if onboarding_complete %}
+                    <div class="alert alert-success mb-4" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i> 🎉 Congrats on successfully onboarding! Start your security assessment by generating a questionnaire for yourself.
                     </div>
-                    <div class="text-center">
-                        <a href="{% url 'questionnaire' %}" class="btn btn-primary">Generate Questionnaire</a>
+                    <div class="text-center mb-4">
+                        <a href="{% url 'questionnaire' %}" class="btn btn-primary">
+                            <i class="fas fa-file-alt mr-2"></i>Generate Questionnaire
+                        </a>
                     </div>
-                </div>
-                {% endif %}
+                    {% endif %}
 
-                <!-- If the user has submitted questionnaire -->
-                {% if submitted_questionnaire %}
-                <div class="container-fluid">
-                    <div class="alert alert-success" role="alert">
-                        🎉 Congrats on successfully submitting your questionnaire! Find out your security status by generating your risk assessment report.
+                    <!-- Questionnaire Submitted Alert -->
+                    {% if submitted_questionnaire %}
+                    <div class="alert alert-success mb-4" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i> 🎉 Congrats on successfully submitting your questionnaire! Find out your security status by generating your risk assessment report.
                     </div>
-                    <div class="text-center">
-                        <a href="{% url 'risk_assessment' vendor.id %}" class="btn btn-primary">Have a look at your risks</a>
+                    <div class="text-center mb-4">
+                        <a href="{% url 'risk_assessment' vendor.id %}" class="btn btn-primary">
+                            <i class="fas fa-shield-alt mr-2"></i>Have a look at your risks
+                        </a>
                     </div>
-                </div>
-                {% endif %}
+                    {% endif %}
 
-              {% if request.user.is_superuser or request.user.is_staff %}
-                <div class="container-fluid">
+                    <!-- Admin Dashboard Stats -->
+                    {% if request.user.is_superuser or request.user.is_staff %}
                     <div class="row">
+                        <!-- Total Vendors Card -->
                         <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-primary shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Vendors</div>
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Total Vendors</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_vendors }}</div>
                                         </div>
                                         <div class="col-auto">
@@ -102,12 +195,15 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- High-Risk Vendors Card -->
                         <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-danger shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">High-Risk Vendors</div>
+                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                                High-Risk Vendors</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ high_risk_vendors }}</div>
                                         </div>
                                         <div class="col-auto">
@@ -117,19 +213,177 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Medium-Risk Vendors Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Medium-Risk Vendors</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ medium_risk_vendors|default:"0" }}</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-flag fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Low-Risk Vendors Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Low-Risk Vendors</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ low_risk_vendors|default:"0" }}</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Recent Assessments -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Recent Risk Assessments</h6>
+                            <a href="{% url 'risk-list' %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-arrow-right"></i> View All
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_assessments %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Vendor</th>
+                                            <th>Risk Level</th>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for assessment in recent_assessments|default:'' %}
+                                        <tr>
+                                            <td>{{ assessment.vendor.name }}</td>
+                                            <td>
+                                                {% if assessment.risk_level == 'high' %}
+                                                <span class="badge badge-danger">High</span>
+                                                {% elif assessment.risk_level == 'medium' %}
+                                                <span class="badge badge-warning">Medium</span>
+                                                {% else %}
+                                                <span class="badge badge-success">Low</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ assessment.date_created }}</td>
+                                            <td>
+                                                <a href="{% url 'risk_assessment' assessment.id %}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-clipboard-list fa-3x text-gray-300 mb-3"></i>
+                                <p>No recent assessments found.</p>
+                                <a href="{% url 'risk-list' %}" class="btn btn-primary mt-2">
+                                    <i class="fas fa-plus mr-1"></i> Create Assessment
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- For non-admin users -->
+                    {% if not request.user.is_superuser and not request.user.is_staff %}
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <!-- Quick Actions Card -->
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex flex-column gap-2">
+                                        <a href="{% url 'vendor-list' %}" class="btn btn-light btn-block text-left mb-2">
+                                            <i class="fas fa-building mr-2 text-primary"></i> View Vendors
+                                        </a>
+                                        <a href="{% url 'risk-list' %}" class="btn btn-light btn-block text-left mb-2">
+                                            <i class="fas fa-exclamation-triangle mr-2 text-warning"></i> View Risk Assessments
+                                        </a>
+                                        <a href="{% url 'checklist-list' %}" class="btn btn-light btn-block text-left mb-2">
+                                            <i class="fas fa-tasks mr-2 text-info"></i> View Checklists
+                                        </a>
+                                        <a href="{% url 'compliance' %}" class="btn btn-light btn-block text-left">
+                                            <i class="fas fa-file-contract mr-2 text-success"></i> Compliance Reports
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <!-- Getting Started Card -->
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Getting Started</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center mb-4">
+                                        <i class="fas fa-shield-alt fa-4x text-primary mb-3"></i>
+                                        <h5>Welcome to RiskAvant</h5>
+                                        <p class="text-gray-600">Your vendor risk management solution</p>
+                                    </div>
+                                    <ol class="text-gray-800">
+                                        <li class="mb-2">Add your vendors to the system</li>
+                                        <li class="mb-2">Complete risk assessment questionnaires</li>
+                                        <li class="mb-2">Review risk assessment results</li>
+                                        <li>Implement recommended remediation actions</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-              {% endif %}
+                <!-- /.container-fluid -->
             </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>© 2025 RiskAvant</span>
+                        <span>© 2025 RiskAvant. All rights reserved.</span>
                     </div>
                 </div>
             </footer>
+            <!-- End of Footer -->
         </div>
+        <!-- End of Content Wrapper -->
     </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Scripts -->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
