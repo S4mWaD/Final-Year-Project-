@@ -23,7 +23,7 @@ urlpatterns = [
     path('audit-log/', views.audit_log, name='audit-log'),
     path('terms/', views.terms, name='terms'),
     path('questionnaire/', views.generate_questionnaire, name='questionnaire'),
-    path('risk_assessment/<int:vendor_id>/', views.calculate_risk, name='risk_assessment'),
+    path('risk_assessment/<int:assessment_id>/', views.risk_assessment_detail, name='risk_assessment'),
     
     # PDF Generation Route
     path('generate_pdf/<int:vendor_id>/', views.generate_pdf, name='generate_pdf'),

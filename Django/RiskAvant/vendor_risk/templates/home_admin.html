@@ -1,0 +1,353 @@
+<!-- Home page for admin -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>RiskAvant - Admin Home</title>
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'css/home.css' %}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8f9fc;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+        .card-header {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #4e73df; 
+        }
+        .card-title {
+            font-size: 2rem;
+        }
+        .dashboard-heading {
+            font-weight: 700;
+            color: #4e73df;
+        }
+        table th {
+            color: #4e73df;
+            font-weight: 600;
+        }
+        .btn-sm i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'dashboard' %}">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">RiskAvant</div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item active">
+                <a class="nav-link" href="{% url 'dashboard' %}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Vendor Management
+            </div>
+
+            <!-- Nav Items - Vendor Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'vendor-list' %}">
+                    <i class="fas fa-building"></i>
+                    <span>Vendors</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'risk-list' %}">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Risk Assessments</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'checklist-list' %}">
+                    <i class="fas fa-tasks"></i>
+                    <span>Checklists</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'compliance' %}">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Compliance</span>
+                </a>
+            </li>
+            
+            {% if request.user.is_superuser or request.user.is_staff %}
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Admin Panel
+            </div>
+
+            <!-- Nav Items - Admin -->
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">
+                    <i class="fas fa-user-cog"></i>
+                    <span>User Management</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Audit Logs</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">
+                    <i class="fas fa-chart-line"></i>
+                    <span>System Reports</span>
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline mt-3">
+                <button class="btn btn-light btn-sm" id="sidebarToggle">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
+            <div id="content">
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Navbar -->
+                <ul class="navbar-nav ml-auto">
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle"  id="userDropdown" role="button" data-toggle="dropdown">
+                                <div class="d-flex align-items-center">
+                                    <span class="mr-2 text-gray-600 small">{{ user.username }}</span>
+                                </div>
+                                
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="{% url 'profile' %}">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Profile
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- End of Topbar -->
+<div class="container-fluid pt-4">
+    <h2 class="dashboard-heading text-center mb-4">Admin Dashboard</h2>
+
+    <div class="row">
+        <!-- Admin Stat Cards -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card text-white bg-primary">
+                <div class="card-header">Total Vendors</div>
+                <div class="card-body"><h4 class="card-title">{{ total_vendors }}</h4></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card text-white bg-success">
+                <div class="card-header">Total Users</div>
+                <div class="card-body"><h4 class="card-title">{{ total_users }}</h4></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card text-white bg-warning">
+                <div class="card-header">Total Responses</div>
+                <div class="card-body"><h4 class="card-title">{{ total_responses }}</h4></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card text-white bg-info">
+                <div class="card-header">Total Risk Assessments</div>
+                <div class="card-body"><h4 class="card-title">{{ total_risk_assessments }}</h4></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card text-white bg-dark">
+                <div class="card-header">Checklist Questions</div>
+                <div class="card-body"><h4 class="card-title">{{ total_questions }}</h4></div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Assessments -->
+    <div class="card shadow mb-5">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Recent Risk Assessments</h6>
+            <a href="{% url 'risk-list' %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-arrow-right"></i> View All
+            </a>
+        </div>
+        <div class="card-body">
+            {% if recent_assessments %}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Vendor</th>
+                            <th>Risk Level</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assessment in recent_assessments %}
+                        <tr>
+                            <td>{{ assessment.vendor.name }}</td>
+                            <td>
+                                {% if assessment.risk_level == 'High' %}
+                                <span class="badge badge-danger">High</span>
+                                {% elif assessment.risk_level == 'Medium' %}
+                                <span class="badge badge-warning">Medium</span>
+                                {% else %}
+                                <span class="badge badge-success">Low</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ assessment.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="{% url 'risk_assessment' assessment.id %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center text-muted">No recent assessments available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+        <!-- Footer -->
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>© 2025 RiskAvant. All rights reserved.</span>
+                </div>
+            </div>
+        </footer>
+        <!-- End of Footer -->
+    </div>
+    <!-- End of Content Wrapper -->
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+<!-- Required for Bootstrap dropdowns to work -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
+<!-- Chart.js Script -->
+<script>
+    var rawData = '{{ chart_data|safe }}';
+    try {
+        var chartData = JSON.parse(rawData);
+    } catch (e) {
+        console.error("Chart parsing failed, fallback used.");
+        chartData = {
+            labels: ["Low Risk", "Medium Risk", "High Risk"],
+            datasets: [{
+                label: "Vendor Risk Levels",
+                data: [0, 0, 0],
+                backgroundColor: ["#28a745", "#ffc107", "#dc3545"]
+            }]
+        };
+    }
+
+    var ctx = document.getElementById('riskChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Vendor Risk Distribution' }
+            }
+        }
+    });
+</script>
+<script>
+    // Sidebar toggler (bottom left)
+    const sidebarToggleBtn = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const body = document.body;
+
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', function () {
+            sidebar.classList.toggle('toggled');
+            body.classList.toggle('sidebar-toggled');
+        });
+    }
+
+    // Optional: for topbar toggle (on mobile)
+    const sidebarToggleTop = document.getElementById('sidebarToggleTop');
+    if (sidebarToggleTop) {
+        sidebarToggleTop.addEventListener('click', function () {
+            sidebar.classList.toggle('toggled');
+            body.classList.toggle('sidebar-toggled');
+        });
+    }
+</script>
+</body>
+</html>

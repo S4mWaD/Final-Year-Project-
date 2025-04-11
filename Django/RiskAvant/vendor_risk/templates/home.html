@@ -382,10 +382,55 @@
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
+    
     <!-- Scripts -->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+    <script>
+        var rawData = '{{ chart_data|safe }}';
+        console.log("Raw Chart Data:", rawData);
+    
+        try {
+            if (rawData) {
+                var chartData = JSON.parse(rawData);
+                console.log("Parsed Chart Data:", chartData);
+            } else {
+                throw new Error("Empty or invalid chart data");
+            }
+        } catch (e) {
+            console.error("Error parsing chart data:", e);
+            var chartData = {
+                labels: ["Low Risk", "Medium Risk", "High Risk"],
+                datasets: [{
+                    label: "Vendor Risk Levels",
+                    data: [0, 0, 0],
+                    backgroundColor: ["#28a745", "#ffc107", "#dc3545"]
+                }]
+            };
+        }
+    
+        var ctx = document.getElementById('riskChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: chartData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: "#333"
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Statistics of Vendors',
+                        color: "#333"
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

@@ -15,63 +15,189 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/login.css' %}" rel="stylesheet">
 </head>
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+            }
 
+    .login-card {
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
+        width: 850px;
+        max-width: 100%;
+    }
+
+    .login-banner {
+    background-color: #0d1b2a;
+    width: 45%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+.login-banner img {
+    max-height: 450px;
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+    .logo-container h2 {
+        font-weight: 600;
+        font-size: 24px;
+        color: #0d1b2a;
+    }
+
+    .login-form-container {
+        padding: 40px;
+        width: 55%;
+    }
+
+    .login-header h1 {
+        font-size: 28px;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #0d1b2a;
+    }
+
+    .login-header p {
+        color: #0d1b2a;
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        color: #0d1b2a;
+    }
+
+    .input-group {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #0d1b2a;
+    }
+
+    .input-group input {
+        padding-left: 35px;
+        width: 100%;
+        height: 45px;
+        border: 1px solid #0d1b2a;
+        border-radius: 5px;
+    }
+
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .login-button {
+        width: 100%;
+        background: #1b3654;
+        color: #fff;
+        border: none;
+        padding: 12px;
+        font-weight: 600;
+        border-radius: 5px;
+        transition: 0.3s ease;
+    }
+
+    .login-button:hover {
+        background: #0d1b2a;
+    }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .login-footer a {
+        color: #0d1b2a;
+        text-decoration: none;
+    }
+
+    .forgot-password {
+        font-size: 0.9rem;
+    }
+
+    .error-message {
+        color: #e74a3b;
+        margin-bottom: 20px;
+    }
+
+</style>
 <body>
     <div class="login-container">
         <div class="login-card">
-            <div class="login-card-inner">
-                <div class="login-banner">
-                    <div class="logo-container">
-                        <h2>RiskAvant</h2>
-                    </div>
+            <!-- Logo Section -->
+            <div class="login-banner">
+                <div class="logo-container">
+                    <img src="{% static 'images/portrait.png' %}" alt="RiskAvant Logo">
+                    
                 </div>
-                <div class="login-form-container">
-                    <div class="login-header">
-                        <h1>Welcome Back</h1>
-                        <p>Please enter your credentials to continue</p>
-                    </div>
-                    
-                    {% if messages %}
-                    <div class="error-message">
-                        {% for message in messages %}
-                        <p><i class="fas fa-exclamation-circle"></i> {{ message }}</p>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    
-                    <form class="login-form" method="post" action="{% url 'login' %}">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <div class="input-group">
-                                <span class="input-icon"><i class="fas fa-user"></i></span>
-                                <input type="text" id="username" name="username" placeholder="Enter your username" required>
-                            </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="login-form-container">
+                <div class="login-header">
+                    <h1>Welcome Back</h1>
+                    <p>Please enter your credentials to continue</p>
+                </div>
+
+                {% if messages %}
+                <div class="error-message">
+                    {% for message in messages %}
+                    <p><i class="fas fa-exclamation-circle"></i> {{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form class="login-form" method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <div class="input-group">
+                            <span class="input-icon"><i class="fas fa-user"></i></span>
+                            <input type="text" id="username" name="username" placeholder="Enter your username" required>
                         </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <div class="input-group">
-                                <span class="input-icon"><i class="fas fa-lock"></i></span>
-                                <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                            </div>
-                        </div>
-                        <div class="form-options">
-                            <div class="remember-me">
-                                <input type="checkbox" id="customCheck" name="remember">
-                                <label for="customCheck">Remember me</label>
-                            </div>
-                            <a href="{% url 'password_reset' %}" class="forgot-password">Forgot Password?</a>
-                        </div>
-                        <button type="submit" class="login-button">Sign In</button>
-                    </form>
-                    <div class="login-footer">
-                        <p>Don't have an account? <a href="{% url 'signup' %}">Sign up</a></p>
                     </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-group">
+                            <span class="input-icon"><i class="fas fa-lock"></i></span>
+                            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                    </div>
+                    <div class="form-options">
+                        <div class="remember-me">
+                            <input type="checkbox" id="customCheck" name="remember">
+                            <label for="customCheck">Remember me</label>
+                        </div>
+                        <a href="{% url 'password_reset' %}" class="forgot-password">Forgot Password?</a>
+                    </div>
+                    <button type="submit" class="login-button">Sign In</button>
+                </form>
+                <div class="login-footer">
+                    <p>Don't have an account? <a href="{% url 'signup' %}">Sign up</a></p>
                 </div>
             </div>
         </div>
     </div>
-
-    
 </body>
+
 </html>

@@ -1,125 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile - RiskAvant</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+    <!-- Fonts and Base Styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="{% static 'css/home.css' %}" rel="stylesheet">
     <style>
+        :root {
+            --primary: #4e73df;
+            --secondary: #6c757d;
+            --bg: #f8f9fc;
+            --text: #2e3a59;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background-color: #f8f9fc;
-            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--bg);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            overflow: hidden;
         }
-        .profile-container {
-            width: 40%;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-        }
-        .profile-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .profile-header h2 {
-            font-weight: 700;
-            color: #333;
-        }
-        .profile-info {
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-        }
-        .profile-info p {
-            font-size: 16px;
-            color: #555;
-            margin: 8px 0;
-        }
-        .profile-info strong {
-            color: #222;
-        }
-        .profile-actions {
+
+        .left-panel {
+            width: 35%;
+            background-color: #0d1b2a;
+            color: white;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-        }
-        .btn {
-            padding: 12px 15px;
-            border: none;
-            cursor: pointer;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: 0.3s;
-            font-weight: 500;
-        }
-        .btn-primary {
-            background: #4e73df;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #2e59d9;
-        }
-        .btn-secondary {
-            background: #858796;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background: #6c757d;
-        }
-        .upload-container {
-            display: flex;
             align-items: center;
-            gap: 10px;
+            padding: 40px 20px;
         }
-        input[type="file"] {
-            padding: 6px;
-            border: 1px solid #ddd;
+
+        .left-panel img.logo {
+            width: 140px;
+            margin-bottom: 30px;
+        }
+
+        .left-panel h2 {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+
+        .right-panel {
+            width: 65%;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .profile-details p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .profile-details strong {
+            color: var(--primary);
+        }
+
+        .actions {
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            margin-right: 10px;
+        }
+
+        .btn-primary:hover {
+            background-color: #2e59d9;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .upload-form {
+            margin-top: 20px;
+        }
+
+        .upload-form label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .upload-form input[type="file"] {
+            width: 100%;
+            padding: 8px;
             border-radius: 6px;
-            background-color: #f8f9fc;
-            transition: border-color 0.3s;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
         }
-        input[type="file"]:focus {
-            border-color: #4e73df;
-            outline: none;
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                border-radius: 0;
+            }
+            .left-panel, .right-panel {
+                width: 100%;
+                text-align: center;
+            }
+            .right-panel {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="profile-container">
-        <div class="profile-header">
-            <h2>User Profile</h2>
+    <div class="container">
+        <!-- Left Panel with Branding -->
+        <div class="left-panel">
+            <img src="{% static 'images/landscape.png' %}" alt="RiskAvant Logo" class="logo">
+            <h2>RiskAvant</h2>
+            <p>Secure Vendor Management</p>
         </div>
-        <div class="profile-info">
-            <p><strong>Username:</strong> {{ user.username }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Organization:</strong> {{ user.organization_name|default:'N/A' }}</p>
-            <p><strong>Role:</strong> 
-                {% if user.is_superuser or user.is_staff %}
-                    Admin
-                {% else %}
-                    User
-                {% endif %}
-            </p>
-        </div>
-        <div class="profile-actions">
-            <form method="post" action="{% url 'onboarding' user.id %}">
+
+        <!-- Right Panel with Profile Info -->
+        <div class="right-panel">
+            <h2 style="margin-bottom: 20px;">User Profile</h2>
+            <div class="profile-details">
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Organization:</strong> {{ user.organization_name|default:"N/A" }}</p>
+                <p><strong>Role:</strong>
+                    {% if user.is_superuser or user.is_staff %}
+                        Admin
+                    {% else %}
+                        User
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="actions">
+                <form method="post" action="{% url 'onboarding' user.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Start Onboarding</button>
+                </form>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="upload-form">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-primary">Start Onboarding</button>
-            </form>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="upload-container">
-                    <label for="profile_picture">Upload Profile Picture:</label>
-                    <input type="file" name="profile_picture" id="profile_picture">
-                </div>
+                <label for="profile_picture">Upload Profile Picture:</label>
+                <input type="file" name="profile_picture" id="profile_picture">
                 <button type="submit" class="btn btn-secondary">Upload</button>
             </form>
         </div>
     </div>
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
 </body>
 </html>

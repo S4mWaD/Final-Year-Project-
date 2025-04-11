@@ -21,21 +21,63 @@ def home(request):
     vendor = Vendor.objects.filter(user=user).first()
     onboarding_complete = False
     submitted_questionnaire = False
-    
+
     if vendor:
-        # Ensure all critical fields are filled
         required_fields = [vendor.name, vendor.contact_email, vendor.contact_phone, vendor.address]
         onboarding_complete = all(required_fields)
-    
-        # check if the questionnaire is submitted
         submitted_questionnaire = VendorResponse.objects.filter(vendor=vendor).exists()
 
-    return render(request, 'home.html', {
-        'user_role': user.role,
-        'vendor': vendor,
-        'onboarding_complete': onboarding_complete
-        , 'submitted_questionnaire': submitted_questionnaire
-    })
+    if user.is_superuser or user.is_staff:
+        # Admin-side stats
+        total_vendors = Vendor.objects.count()
+        total_responses = VendorResponse.objects.count()
+        total_questions = QuestionBank.objects.count()
+        total_risk_assessments = RiskAssessment.objects.count()
+        total_users = CustomUser.objects.count()
+
+        # Risk assessment distribution
+        low_risk_count = RiskAssessment.objects.filter(risk_level="Low").count()
+        medium_risk_count = RiskAssessment.objects.filter(risk_level="Medium").count()
+        high_risk_count = RiskAssessment.objects.filter(risk_level="High").count()
+
+        # Chart data for dashboard
+        chart_data = {
+            "labels": ["Low Risk", "Medium Risk", "High Risk"],
+            "datasets": [{
+                "label": "Risk Assessment Levels",
+                "data": [low_risk_count, medium_risk_count, high_risk_count],
+                "backgroundColor": ["#28a745", "#ffc107", "#dc3545"]
+            }]
+        }
+        chart_data_json = json.dumps(chart_data)
+
+        # ✅ Include 5 most recent risk assessments
+        recent_assessments = RiskAssessment.objects.select_related('vendor').order_by('-created_at')[:5]
+
+        return render(request, 'home_admin.html', {
+            'total_vendors': total_vendors,
+            'total_responses': total_responses,
+            'total_questions': total_questions,
+            'total_risk_assessments': total_risk_assessments,
+            'total_users': total_users,
+            'chart_data': chart_data_json,
+            'recent_assessments': recent_assessments,  # ✅ Injected for dashboard table
+        })
+
+    else:
+        # Regular user view
+        recent_assessments = []
+        if vendor:
+            recent_assessments = RiskAssessment.objects.filter(vendor=vendor).order_by('-created_at')[:5]
+
+        return render(request, 'home_user.html', {
+            'user_role': user.role,
+            'vendor': vendor,
+            'onboarding_complete': onboarding_complete,
+            'submitted_questionnaire': submitted_questionnaire,
+            'recent_assessments': recent_assessments
+        })
+
 
 
 # A landing page view to redirect to landing page
@@ -205,9 +247,56 @@ def admin_dashboard(request):
 
 # Vendor Risk Assessment View
 @login_required
-def risk_assessment(request):
-    assessments = RiskAssessment.objects.all()
-    return render(request, 'risk_assessment.html', {'user_role': request.user.role, 'assessments': assessments})
+def risk_assessment_detail(request, assessment_id):
+    assessment = get_object_or_404(RiskAssessment, id=assessment_id)
+
+    # 🔐 BOLA protection
+    if not request.user.is_superuser and assessment.vendor.user != request.user:
+        return HttpResponse("Unauthorized access", status=403)
+
+    # 🧠 Recalculate weighted scores to render chart
+    responses = VendorResponse.objects.filter(vendor=assessment.vendor)
+
+    SCORE_MAPPING = {"Yes": 0, "No": 10, "Partial": 5, "N/A": 0}
+    CATEGORY_WEIGHTS = {
+        "Technical": 40, "Compliance": 20, "Legal": 15,
+        "General": 15, "Operational": 10,
+    }
+
+    category_scores = {k: 0 for k in CATEGORY_WEIGHTS}
+    category_totals = {k: 0 for k in CATEGORY_WEIGHTS}
+
+    for r in responses:
+        cat = r.question.category
+        score = SCORE_MAPPING.get(r.response, 0)
+        category_scores[cat] += score
+        category_totals[cat] += 10
+
+    weighted_scores = {
+        c: (category_scores[c] / (category_totals[c] or 1)) * CATEGORY_WEIGHTS[c]
+        for c in CATEGORY_WEIGHTS
+    }
+
+    chart_data = {
+        "labels": list(weighted_scores.keys()),
+        "datasets": [{
+            "label": "Risk Category Scores",
+            "data": list(weighted_scores.values()),
+            "backgroundColor": ["#4e73df", "#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b"],
+            "borderColor": ["#2e59d9", "#17a673", "#2c9faf", "#dda20a", "#be2617"],
+            "borderWidth": 1,
+        }]
+    }
+
+    return render(request, 'risk_assessment.html', {
+        'assessment': assessment,
+        'vendor': assessment.vendor,
+        'risk_level': assessment.risk_level,
+        'risk_score': assessment.total_risk_score,
+        'weighted_risk_score': assessment.total_risk_score,  # for floatformat
+        'chart_data': json.dumps(chart_data),
+        'date': assessment.assessment_date,
+    })
 
 # Vendor List View
 @login_required
@@ -343,16 +432,6 @@ def risk_assessment(request):
 
 def terms(request):
     return render(request, 'terms.html')
-
-
-import json
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-import weasyprint
-from .models import Vendor, RiskAssessment, VendorResponse
-from django.contrib.auth.decorators import login_required
-
 
 @login_required
 def generate_pdf(request, vendor_id):

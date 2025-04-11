@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>RiskAvant - User Home</title>
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'css/home.css' %}" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8f9fc;
+        }
+
+        .dashboard-heading {
+            font-weight: 700;
+            color: #4e73df;
+        }
+
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        }
+
+        .btn i {
+            margin-right: 6px;
+        }
+    </style>
+</head>
+
+<body id="page-top">
+<div id="wrapper">
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+            <div class="sidebar-brand-icon rotate-n-15">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">RiskAvant</div>
+        </a>
+
+        <hr class="sidebar-divider my-0">
+        <li class="nav-item active">
+            <a class="nav-link" href="#">
+                <i class="fas fa-fw fa-home"></i>
+                <span>User Home</span>
+            </a>
+        </li>
+
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">Vendor Tools</div>
+        <li class="nav-item"><a class="nav-link" href="{% url 'vendor-list' %}"><i class="fas fa-building"></i> <span>Vendors</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'risk-list' %}"><i class="fas fa-exclamation-triangle"></i> <span>Risk Assessments</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'checklist-list' %}"><i class="fas fa-tasks"></i> <span>Checklists</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'compliance' %}"><i class="fas fa-file-contract"></i> <span>Compliance</span></a></li>
+
+        <!-- Sidebar Toggler -->
+        <div class="text-center d-none d-md-inline mt-3">
+            <button class="btn btn-light btn-sm" id="sidebarToggle">
+                <i class="fas fa-angle-left"></i>
+            </button>
+        </div>
+    </ul>
+    <!-- End Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <!-- Topbar -->
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none"><i class="fa fa-bars"></i></button>
+
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                            <span class="mr-2 text-gray-600 small">{{ user.username }}</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="userDropdown">
+                            <a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>Profile</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <!-- End Topbar -->
+
+            <!-- Main Content -->
+            <div class="container-fluid pt-3">
+                <h2 class="dashboard-heading text-center mb-4">Welcome, {{ user.username }}</h2>
+
+                {% if onboarding_complete %}
+                <div class="alert alert-success shadow-sm" role="alert">
+                    <i class="fas fa-check-circle mr-2"></i> 🎉 Onboarding complete! You can now generate your security questionnaire.
+                </div>
+                <div class="text-center mb-4">
+                    <a href="{% url 'questionnaire' %}" class="btn btn-primary"><i class="fas fa-file-alt"></i> Generate Questionnaire</a>
+                </div>
+                {% endif %}
+
+                {% if submitted_questionnaire %}
+                <div class="alert alert-info shadow-sm" role="alert">
+                    <i class="fas fa-check-circle mr-2"></i> Questionnaire submitted! You may now view your Risk Assessment Report.
+                </div>
+                <div class="text-center mb-4">
+                    <a href="{% url 'risk_assessment' vendor.id %}" class="btn btn-success"><i class="fas fa-shield-alt"></i> View Risk Report</a>
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow">
+                            <div class="card-header text-primary font-weight-bold">Your Assessment Status</div>
+                            <div class="card-body">
+                                <p><i class="fas fa-user-check"></i> Onboarding: <strong>{{ onboarding_complete|yesno:"Complete,Incomplete" }}</strong></p>
+                                <p><i class="fas fa-tasks"></i> Questionnaire: <strong>{{ submitted_questionnaire|yesno:"Submitted,Pending" }}</strong></p>
+                                <p><i class="fas fa-shield-alt"></i> Risk Assessment: <strong>{% if submitted_questionnaire %}Completed{% else %}Pending{% endif %}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow">
+                            <div class="card-header text-primary font-weight-bold">Quick Actions</div>
+                            <div class="card-body">
+                                <a href="{% url 'vendor-list' %}" class="btn btn-light btn-block mb-2"><i class="fas fa-building text-primary"></i> View Vendors</a>
+                                <a href="{% url 'checklist-list' %}" class="btn btn-light btn-block mb-2"><i class="fas fa-tasks text-info"></i> View Checklists</a>
+                                <a href="{% url 'risk-list' %}" class="btn btn-light btn-block mb-2"><i class="fas fa-exclamation-triangle text-warning"></i> Risk Assessments</a>
+                                <a href="{% url 'compliance' %}" class="btn btn-light btn-block"><i class="fas fa-file-contract text-success"></i> Compliance</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Walkthrough Section -->
+                <div class="card shadow mb-5">
+                    <div class="card-header font-weight-bold text-primary">How to Use RiskAvant</div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3"><i class="fas fa-user-plus fa-2x text-primary mb-2"></i><p>Add Vendors</p></div>
+                            <div class="col-md-3 mb-3"><i class="fas fa-file-alt fa-2x text-info mb-2"></i><p>Generate Questionnaire</p></div>
+                            <div class="col-md-3 mb-3"><i class="fas fa-chart-line fa-2x text-warning mb-2"></i><p>Review Risk Score</p></div>
+                            <div class="col-md-3 mb-3"><i class="fas fa-cogs fa-2x text-secondary mb-2"></i><p>Take Action</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Main Content -->
+        </div>
+
+        <!-- Footer -->
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>© 2025 RiskAvant. All rights reserved.</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+<script>
+    // Sidebar toggler (bottom left)
+    const sidebarToggleBtn = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const body = document.body;
+
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', function () {
+            sidebar.classList.toggle('toggled');
+            body.classList.toggle('sidebar-toggled');
+        });
+    }
+
+    // Optional: for topbar toggle (on mobile)
+    const sidebarToggleTop = document.getElementById('sidebarToggleTop');
+    if (sidebarToggleTop) {
+        sidebarToggleTop.addEventListener('click', function () {
+            sidebar.classList.toggle('toggled');
+            body.classList.toggle('sidebar-toggled');
+        });
+    }
+</script>
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
