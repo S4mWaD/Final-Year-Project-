@@ -1,5 +1,5 @@
+{% load static %}
 {% load custom_filters %}
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,160 +10,173 @@
             margin: 30px;
             color: #333;
         }
-        header {
+        header, section.cover-page {
             text-align: center;
-            margin-bottom: 20px;
-        }
-        h1, h2, h3, h4, h5 {
-            text-align: center;
-            margin: 10px 0;
-            color: #333;
+            margin-top: 80px;
+            page-break-after: always;
         }
         h1 {
-            font-size: 28px;
+            font-size: 36px;
             color: #0056b3;
         }
         h2 {
-            font-size: 24px;
-            margin-top: 5px;
+            font-size: 28px;
+            margin-top: 10px;
         }
         h3 {
-            font-size: 20px;
-            margin-top: 15px;
-        }
-        h4, h5 {
-            font-size: 18px;
-            margin-top: 10px;
+            font-size: 22px;
+            margin-top: 20px;
+            text-align: center;
         }
         p, table {
             margin: 20px auto;
             width: 80%;
             line-height: 1.6;
-            text-align: left;
         }
         table {
             border-collapse: collapse;
         }
-        table, th, td {
+        th, td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: center;
         }
         th {
             background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        .high-risk {
-            color: red;
-            font-weight: bold;
-        }
-        .medium-risk {
-            color: orange;
-            font-weight: bold;
-        }
-        .low-risk {
-            color: green;
-            font-weight: bold;
-        }
-        .summary {
-            margin: 20px auto;
-            text-align: left;
-            width: 80%;
-        }
-        .summary h3 {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 10px;
         }
         .chart-container {
-            margin: 20px auto;
+            margin: 40px auto;
             text-align: center;
+        }
+        .critical-question {
+            background-color: #ffe8e8;
+            padding: 10px;
+            margin: 10px auto;
+            width: 80%;
+            border-left: 5px solid #dc3545;
         }
         .footer {
             text-align: center;
-            margin-top: 30px;
             font-size: 14px;
+            margin-top: 50px;
             color: #777;
         }
+        .page-break {
+            page-break-before: always;
+        }
+        .toc {
+            width: 80%;
+            margin: 40px auto;
+        }
+        .toc h3 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .toc li {
+            margin: 8px 0;
+        }
     </style>
-    
 </head>
 <body>
+<!-- Cover Page -->
+<section class="cover-page">
+    <img src = "{% static 'images/landscape.png' %}" alt="RiskAvant Logo" width="120">
+    <h1>RiskAvant</h1>
+    <h2>Risk Assessment Report</h2>
+    <p><strong>Organization:</strong> {{ vendor.name }}</p>
+    <p><strong>Date:</strong> {{ current_date }}</p>
+</section>
 
-    <header>
-        <h1>RiskAvant - Risk Assessment Report</h1>
-        <h2>{{ vendor.name }}</h2>
-        <p>Generated on: <strong>{{ current_date }}</strong></p>
-    </header>
-    
+<!-- Table of Contents -->
+<section class="toc">
+    <h3>Table of Contents</h3>
+    <ul>
+        <li>1. Executive Summary</li>
+        <li>2. Risk Scoring Mechanism</li>
+        <li>3. Risk Distribution - Pie Chart</li>
+        <li>4. Risk Distribution - Bar Chart</li>
+        <li>5. Appendix: Questionnaire and Responses</li>
+        {% if critical_findings %}<li>6. Highlighted Critical Questions</li>{% endif %}
+    </ul>
+</section>
 
-<section class="summary">
+<!-- Executive Summary -->
+<section class="page-break">
     <h3>Executive Summary</h3>
-    <p>This report provides a comprehensive assessment of the risk associated with the vendor, <strong>{{ vendor.name }}</strong>.
-        The analysis evaluates various categories of risk and generates an overall risk score. The chart below provides a visual breakdown of the risk scores by category.</p>
+    <p>This risk assessment report offers a detailed evaluation of the potential risks associated with the vendor, <strong>{{ vendor.name }}</strong>. The assessment follows a standardized methodology where each question is rated for risk exposure, including consideration for critical questions. The report presents both a high-level overview and detailed data insights.</p>
+    <p>Vendor responses are analyzed across five categories: Technical, Compliance, Legal, General, and Operational. Each response is scored based on industry-standard best practices, and weighted according to the importance of the category.</p>
 </section>
 
-<div class="chart-container">
-    <h3>Category-wise Risk Breakdown (Visual)</h3>
-    <img src="data:image/png;base64,{{ chart_image }}" alt="Risk Chart" width="400" height="300" />
-</div>
-
+<!-- Risk Scoring Explanation -->
 <section>
-    <h3>Overall Risk Assessment</h3>
-    <div class="summary">
-        <h4>Overall Risk Score: <span>{{ weighted_risk_score|floatformat:2 }}%</span></h4>
-        <h4>Risk Level: 
-            {% if risk_level == "High" %}
-            <span class="high-risk">{{ risk_level }}</span>
-            {% elif risk_level == "Medium" %}
-            <span class="medium-risk">{{ risk_level }}</span>
-            {% else %}
-            <span class="low-risk">{{ risk_level }}</span>
-            {% endif %}
-        </h4>
-    </div>
-</section>
-
-<section>
-    <h3>Category-wise Risk Breakdown (Table)</h3>
-    <table>
-        <tr>
-            <th>Category</th>
-            <th>Weightage (%)</th>
-            <th>Score (%)</th>
-        </tr>
-        {% for category, score in weighted_scores.items %}
-        <tr>
-            <td>{{ category }}</td>
-            <td>{{ category_weights|get_value:category|floatformat:2 }}</td>
-            <td>{{ score|floatformat:2 }}</td>
-        </tr>
+    <h3>Risk Scoring Mechanism</h3>
+    <p>Each question is scored as follows:</p>
+    <ul style="width: 80%; margin: auto;">
+        <li><strong>Yes</strong>: 0 (No risk)</li>
+        <li><strong>No</strong>: 10 (High risk)</li>
+        <li><strong>Partial</strong>: 5 (Medium risk)</li>
+        <li><strong>N/A</strong>: 0 (No impact)</li>
+    </ul>
+    <p>Questions marked as <strong>critical</strong> are given 1.5× the risk weight. Each category has a designated weight which contributes to the final risk score as follows:</p>
+    <ul style="width: 80%; margin: auto;">
+        {% for category, weight in category_weights.items %}
+        <li><strong>{{ category }}</strong>: {{ weight }}%</li>
         {% endfor %}
-    </table>
+    </ul>
 </section>
 
-<section>
-    <h3>Detailed Questionnaire Responses</h3>
+<!-- Charts -->
+<section class="chart-container page-break">
+    <h3>Risk Distribution - Pie Chart</h3>
+    <img src="data:image/png;base64,{{ chart_image }}" alt="Risk Pie Chart" width="400" height="300" />
+</section>
+
+<section class="chart-container">
+    <h3>Risk Distribution - Bar Chart</h3>
+    <img src="data:image/png;base64,{{ bar_chart_image }}" alt="Risk Bar Chart" width="500" height="300" />
+</section>
+
+<!-- Appendix -->
+<section class="page-break">
+    <h3>Appendix: Questionnaire and Responses</h3>
+    {% regroup responses by category as grouped_responses %}
+    {% for group in grouped_responses %}
+    <h4>Category: {{ group.grouper }}</h4>
     <table>
         <tr>
             <th>Question</th>
             <th>Response</th>
-            <th>Category</th>
         </tr>
-        {% for response in responses %}
+        {% for item in group.list %}
         <tr>
-            <td>{{ response.question.question_text }}</td>
-            <td>{{ response.response }}</td>
-            <td>{{ response.question.category }}</td>
+            <td>{{ item.question }}</td>
+            <td>{{ item.response }}</td>
         </tr>
         {% endfor %}
     </table>
+    {% endfor %}
 </section>
+
+{% if critical_findings %}
+<section class="page-break">
+    <h3 style="color: #dc3545">Highlighted Critical Questions</h3>
+    {% for item in critical_findings %}
+    <div class="critical-question">
+        <p><strong>{{ item.question }}</strong></p>
+        <p>Response: <strong>{{ item.response }}</strong></p>
+        <p>Category: {{ item.category }}</p>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
 
 <div class="footer">
     <p>RiskAvant - Risk Assessment Report | Confidential</p>
     <p>&copy; {{ current_year }} RiskAvant. All Rights Reserved.</p>
 </div>
-
 </body>
 </html>

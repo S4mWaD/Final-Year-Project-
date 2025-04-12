@@ -12,11 +12,19 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/home.css' %}" rel="stylesheet">
-    <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .highlight-critical {
+            background-color: #fff3f3;
+            border-left: 5px solid #dc3545;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 
-<body id="page-top">
+<body id="page-top" style="background-color: #f8f9fc;">
     <div id="wrapper">
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
@@ -27,7 +35,7 @@
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.username }}</span>
                                 <img class="img-profile rounded-circle" src="{% static 'img/user.png' %}">
                             </a>
-                            <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="userDropdown">
+                            <div class="dropdown-menu dropdown-menu-right shadow">
                                 <a class="dropdown-item" href="{% url 'profile' %}">View Profile</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
@@ -37,47 +45,104 @@
                 </nav>
 
                 <div class="container-fluid">
-                    <h2 class="text-center mb-4">Risk Assessment Results for {{ vendor.name }}</h2>
+                    <div class="text-center mb-5">
+                        <h2 class="dashboard-title">Risk Assessment for {{ vendor.name }}</h2>
+                        <p class="text-muted">Generated on: {{ date }}</p>
+                    </div>
+
                     <div class="row justify-content-center">
                         <div class="col-lg-8">
+                            <!-- Score Card -->
                             <div class="card shadow mb-4">
-                                <div class="card-header py-3">
+                                <div class="card-header bg-white py-3">
                                     <h6 class="m-0 font-weight-bold text-primary">Overall Risk Score</h6>
                                 </div>
                                 <div class="card-body text-center">
                                     <h3 class="font-weight-bold">{{ weighted_risk_score|floatformat:2 }}%</h3>
-                                    <p class="text-muted">Risk Level: <strong>{{ risk_level }}</strong></p>
+                                    <p class="text-muted mb-2">Risk Level: <strong>{{ risk_level }}</strong></p>
                                     {% if risk_level == "High" %}
-                                    <div class="alert alert-danger">Your risk is high. Immediate action is required.</div>
+                                    <div class="alert alert-danger"> High risk detected. Immediate mitigation is necessary.</div>
                                     {% elif risk_level == "Medium" %}
-                                    <div class="alert alert-warning">Your risk is moderate. Consider improvements.</div>
+                                    <div class="alert alert-warning"> Moderate risk level. Improvements are suggested.</div>
                                     {% else %}
-                                    <div class="alert alert-success">Your risk is low. Keep maintaining best practices.</div>
+                                    <div class="alert alert-success">Low risk detected. Good job maintaining best practices.</div>
                                     {% endif %}
                                 </div>
                             </div>
 
-                            <!-- Chart Visualization -->
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Category-wise Risk Breakdown (Chart)</h6>
+                            <!-- Risk Breakdown Chart -->
+                            <div class="card shadow mb-4 chart-container">
+                                <div class="card-header bg-white py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Category-wise Risk Breakdown</h6>
                                 </div>
                                 <div class="card-body">
                                     <canvas id="riskChart"></canvas>
                                 </div>
                             </div>
 
-                            
+                            <!-- Critical Findings -->
+                            {% if critical_findings %}
+                            <div class="card shadow mb-5">
+                                <div class="card-header bg-white py-3">
+                                    <h6 class="m-0 font-weight-bold text-danger">Critical Question Highlights</h6>
+                                </div>
+                                <div class="card-body">
+                                    {% for item in critical_findings %}
+                                    <div class="highlight-critical">
+                                        <strong>{{ item.question }}</strong><br>
+                                        <span class="badge badge-danger mt-2">Response: {{ item.response }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
-                        <div class="text-center">
-                            <a target="_blank" href="{% url 'generate_pdf' vendor.id %}"  class="btn btn-success">Generate Complete Report</a>
-                            <a href="{% url 'home' %}" class="btn btn-primary">Return to Dashboard</a>
+
+                        <!-- Buttons -->
+                        <div class="text-center btn-group-actions">
+                            <a target="_blank" href="{% url 'generate_pdf' vendor.id %}" class="btn btn-success mr-2">
+                                <i class="fas fa-file-pdf"></i> Generate Complete Report
+                            </a>
+                            <a href="{% url 'home' %}" class="btn btn-primary">
+                                <i class="fas fa-arrow-left"></i> Return to Dashboard
+                            </a>
                         </div>
-                        
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Recommendations Section -->
+<div class="card shadow mb-4">
+    <div class="card-header bg-white py-3">
+        <h6 class="m-0 font-weight-bold text-info">Recommendations</h6>
+    </div>
+    <div class="card-body">
+        {% if risk_level == "High" %}
+        <p><strong> Immediate Actions Required:</strong></p>
+        <ul>
+            <li>Review all critical question responses with your security team.</li>
+            <li>Implement missing controls and conduct a gap analysis.</li>
+            <li>Schedule an internal audit or external assessment ASAP.</li>
+        </ul>
+        {% elif risk_level == "Medium" %}
+        <p><strong>Improvement Recommended:</strong></p>
+        <ul>
+            <li>Reassess partially implemented controls.</li>
+            <li>Prioritize remediation plans for moderate-risk areas.</li>
+            <li>Conduct a review meeting with stakeholders.</li>
+        </ul>
+        {% else %}
+        <p><strong> You're on Track:</strong></p>
+        <ul>
+            <li>Maintain current security measures and continue compliance checks.</li>
+            <li>Schedule periodic reassessments to monitor risk drift.</li>
+            <li>Train staff regularly to uphold best practices.</li>
+        </ul>
+        {% endif %}
+    </div>
+</div>
+
 
     <!-- Chart.js Script -->
     <script>
@@ -96,12 +161,7 @@
                     plugins: {
                         legend: {
                             display: true,
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 14
-                                }
-                            }
+                            position: 'top'
                         }
                     },
                     scales: {
@@ -124,9 +184,5 @@
             });
         });
     </script>
-
-    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
-    <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
-</body>
 
 </html>

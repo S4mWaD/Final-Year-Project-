@@ -1,16 +1,20 @@
+from django.conf import settings
+import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import CustomUser, Vendor, RiskAssessment, Certification, SecurityProfile, SecurityChecklist, QuestionnaireRules, OnboardingQuestionnaire, VendorResponse,QuestionBank
+from .models import CustomUser, Vendor, RiskAssessment, Certification, SecurityProfile, SecurityChecklist, QuestionnaireRules, OnboardingQuestionnaire, VendorResponse,QuestionBank, SecurityChecklistTemplate
 from .forms import SignUpForm, VendorOnboardingForm, SecurityChecklistForm
 from itertools import chain
 import json, weasyprint, matplotlib.pyplot as plt, base64, matplotlib
 matplotlib.use('Agg')
 from io import BytesIO
 from django.template.loader import render_to_string
+from django.db.models import Q 
 from datetime import datetime
+from django.templatetags.static import static
 
 User = get_user_model()
 
@@ -21,11 +25,14 @@ def home(request):
     vendor = Vendor.objects.filter(user=user).first()
     onboarding_complete = False
     submitted_questionnaire = False
+    latest_assessment = None
 
     if vendor:
         required_fields = [vendor.name, vendor.contact_email, vendor.contact_phone, vendor.address]
         onboarding_complete = all(required_fields)
         submitted_questionnaire = VendorResponse.objects.filter(vendor=vendor).exists()
+        latest_assessment = RiskAssessment.objects.filter(vendor=vendor).order_by('-created_at').first()
+        
 
     if user.is_superuser or user.is_staff:
         # Admin-side stats
@@ -75,7 +82,8 @@ def home(request):
             'vendor': vendor,
             'onboarding_complete': onboarding_complete,
             'submitted_questionnaire': submitted_questionnaire,
-            'recent_assessments': recent_assessments
+            'recent_assessments': recent_assessments,
+            'latest_assessment': latest_assessment 
         })
 
 
@@ -122,7 +130,7 @@ def logout_view(request):
 @login_required
 def calculate_risk(request, vendor_id):
     vendor = get_object_or_404(Vendor, id=vendor_id)
-    responses = VendorResponse.objects.filter(vendor=vendor)
+    responses = SecurityChecklist.objects.filter(vendor=vendor, response__isnull=False)
 
     # Define scoring system for responses
     SCORE_MAPPING = {
@@ -132,7 +140,6 @@ def calculate_risk(request, vendor_id):
         "N/A": 0        # No impact if not applicable
     }
 
-    # Define category weights (in percentages summing up to 100)
     CATEGORY_WEIGHTS = {
         "Technical": 40,
         "Compliance": 20,
@@ -141,65 +148,66 @@ def calculate_risk(request, vendor_id):
         "Operational": 10,
     }
 
-    # Calculate scores for each category
-    category_scores = {category: 0 for category in CATEGORY_WEIGHTS}
-    category_totals = {category: 0 for category in CATEGORY_WEIGHTS}
+    category_scores = {cat: 0 for cat in CATEGORY_WEIGHTS}
+    category_totals = {cat: 0 for cat in CATEGORY_WEIGHTS}
 
-    for response in responses:
-        category = response.question.category
-        score = SCORE_MAPPING.get(response.response, 0)
-        category_scores[category] += score
-        category_totals[category] += 10  # Maximum possible score per response
+    for item in responses:
+        category = item.category
+        score = SCORE_MAPPING.get(item.response, 0)
 
-    # Calculate weighted scores for each category
+        # Adjust for critical questions
+        try:
+            template = SecurityChecklistTemplate.objects.filter(question=item.question).first()
+            if template and template.is_critical:
+                score *= 1.5
+        except SecurityChecklistTemplate.DoesNotExist:
+            pass
+
+        if category in category_scores:
+            category_scores[category] += score
+            category_totals[category] += 10  # max score per question is 10
+
     weighted_scores = {}
     for category, total_score in category_scores.items():
-        max_possible_score = category_totals[category] or 1  # Prevent division by zero
-        weighted_scores[category] = (total_score / max_possible_score) * CATEGORY_WEIGHTS[category]
+        max_possible = category_totals[category] or 1  # Prevent div by zero
+        weighted_scores[category] = (total_score / max_possible) * CATEGORY_WEIGHTS[category]
 
-    # Calculate overall weighted risk score (sum of weighted category scores)
-    weighted_risk_score = sum(weighted_scores.values())
+    overall_score = sum(weighted_scores.values())
 
-    # Assign risk level based on overall weighted risk score
-    if weighted_risk_score <= 20:
+    if overall_score <= 20:
         risk_level = "Low"
-    elif 20 < weighted_risk_score <= 50:
+    elif 20 < overall_score <= 50:
         risk_level = "Medium"
     else:
         risk_level = "High"
 
-    # Update or create a RiskAssessment entry for the vendor
     risk_assessment, created = RiskAssessment.objects.update_or_create(
         vendor=vendor,
-        defaults={'total_risk_score': int(weighted_risk_score), 'risk_level': risk_level}
+        defaults={
+            'total_risk_score': int(overall_score),
+            'risk_level': risk_level
+        }
     )
 
-    # Prepare chart data for frontend
     chart_data = {
         "labels": list(weighted_scores.keys()),
         "datasets": [{
             "label": f"Risk Assessment for {vendor.name}",
             "data": list(weighted_scores.values()),
-            "backgroundColor": [
-                "#4e73df", "#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b"
-            ],
-            "borderColor": [
-                "#2e59d9", "#17a673", "#2c9faf", "#dda20a", "#be2617"
-            ],
+            "backgroundColor": ["#4e73df", "#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b"],
+            "borderColor": ["#2e59d9", "#17a673", "#2c9faf", "#dda20a", "#be2617"],
             "borderWidth": 1,
         }]
     }
 
-    # Convert to JSON format
-    chart_data_json = json.dumps(chart_data)
-
     return render(request, "risk_assessment.html", {
         "vendor": vendor,
         "risk_assessment": risk_assessment,
-        "weighted_risk_score": weighted_risk_score,
+        "weighted_risk_score": overall_score,
         "risk_level": risk_level,
-        "chart_data": chart_data_json,
+        "chart_data": json.dumps(chart_data),
     })
+
 @login_required
 def admin_dashboard(request):
     if not request.user.is_superuser:
@@ -250,12 +258,10 @@ def admin_dashboard(request):
 def risk_assessment_detail(request, assessment_id):
     assessment = get_object_or_404(RiskAssessment, id=assessment_id)
 
-    # 🔐 BOLA protection
     if not request.user.is_superuser and assessment.vendor.user != request.user:
         return HttpResponse("Unauthorized access", status=403)
 
-    # 🧠 Recalculate weighted scores to render chart
-    responses = VendorResponse.objects.filter(vendor=assessment.vendor)
+    responses = SecurityChecklist.objects.filter(vendor=assessment.vendor, response__isnull=False)
 
     SCORE_MAPPING = {"Yes": 0, "No": 10, "Partial": 5, "N/A": 0}
     CATEGORY_WEIGHTS = {
@@ -266,11 +272,20 @@ def risk_assessment_detail(request, assessment_id):
     category_scores = {k: 0 for k in CATEGORY_WEIGHTS}
     category_totals = {k: 0 for k in CATEGORY_WEIGHTS}
 
-    for r in responses:
-        cat = r.question.category
-        score = SCORE_MAPPING.get(r.response, 0)
-        category_scores[cat] += score
-        category_totals[cat] += 10
+    for item in responses:
+        category = item.category
+        score = SCORE_MAPPING.get(item.response, 0)
+
+        try:
+            template = SecurityChecklistTemplate.objects.filter(question=item.question).first()
+            if template.is_critical:
+                score *= 1.5
+        except SecurityChecklistTemplate.DoesNotExist:
+            pass
+
+        if category in category_scores:
+            category_scores[category] += score
+            category_totals[category] += 10
 
     weighted_scores = {
         c: (category_scores[c] / (category_totals[c] or 1)) * CATEGORY_WEIGHTS[c]
@@ -293,11 +308,10 @@ def risk_assessment_detail(request, assessment_id):
         'vendor': assessment.vendor,
         'risk_level': assessment.risk_level,
         'risk_score': assessment.total_risk_score,
-        'weighted_risk_score': assessment.total_risk_score,  # for floatformat
+        'weighted_risk_score': assessment.total_risk_score,
         'chart_data': json.dumps(chart_data),
         'date': assessment.assessment_date,
     })
-
 # Vendor List View
 @login_required
 def vendor_list(request):
@@ -305,12 +319,11 @@ def vendor_list(request):
     return render(request, 'vendor_list.html', {'user_role': request.user.role, 'vendors': vendors})
 
 
-# Vendor Onboarding View
-@login_required
+# Vendor Onboarding View@login_required
 def vendor_onboarding(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
     vendor, created = Vendor.objects.get_or_create(user=user, defaults={'name': user.username})
-    
+
     if request.method == 'POST':
         form = VendorOnboardingForm(request.POST, instance=vendor)
         if form.is_valid():
@@ -320,76 +333,131 @@ def vendor_onboarding(request, user_id):
             else:
                 vendor.save()
                 form.save_m2m()
-            messages.success(request, 'Vendor onboarded successfully!')
+            assign_questionnaire_to_vendor(vendor)
+            messages.success(request, 'Vendor onboarded successfully and checklist has been assigned.')
             return redirect('home')
     else:
         form = VendorOnboardingForm(instance=vendor, initial={'certified': vendor.certified})
 
     return render(request, 'onboarding.html', {'user_role': request.user.role, 'form': form, 'user': user})
 
-# Security Questionnaire Generation@login_required
+
+def assign_questionnaire_to_vendor(vendor):
+    questions = SecurityChecklistTemplate.objects.filter(
+        category__in=["General", "Legal", "Operational"]
+    )
+
+    # Add technical questions based on vendor type
+    questions |= SecurityChecklistTemplate.objects.filter(
+        category="Technical",
+        vendor_type=vendor.vendor_type
+    )
+
+    # Add compliance questions if vendor has selected certifications
+    selected_cert_names = vendor.certifications.values_list('name', flat=True)
+    if selected_cert_names:
+        questions |= SecurityChecklistTemplate.objects.filter(
+            category="Compliance",
+            standard_required=True,
+            compliance_standard__in=selected_cert_names
+        )
+
+    for q in questions.distinct():
+        SecurityChecklist.objects.get_or_create(
+            vendor=vendor,
+            question=q.question,
+            defaults={"status": "Pending"}
+        )
+
+
 @login_required
 def generate_questionnaire(request):
     vendor = get_object_or_404(Vendor, user=request.user)
 
-    # Handle form submission
+    # STEP 1: Assign questions if not already done
+    if not SecurityChecklist.objects.filter(vendor=vendor).exists():
+        questions = SecurityChecklistTemplate.objects.filter(
+            category__in=["General", "Legal", "Operational"]
+        )
+
+        # Add Technical questions by vendor type or Any
+        questions |= SecurityChecklistTemplate.objects.filter(
+            category="Technical"
+        ).filter(Q(vendor_type=vendor.vendor_type) | Q(vendor_type="Any"))
+
+        # Add Compliance questions based on selected certifications
+        selected_cert_names = vendor.certifications.values_list('name', flat=True)
+        if selected_cert_names:
+            questions |= SecurityChecklistTemplate.objects.filter(
+                category="Compliance",
+                standard_required=True,
+                compliance_standard__in=selected_cert_names
+            )
+
+        for q in questions.distinct():
+            SecurityChecklist.objects.get_or_create(
+                vendor=vendor,
+                question=q.question,
+                defaults={
+                    "status": "Pending",
+                    "category": q.category
+                }
+            )
+
+    # STEP 2: Fetch checklist items grouped by category
+    all_items = SecurityChecklist.objects.filter(vendor=vendor)
+    categories = ["General", "Technical", "Legal", "Compliance", "Operational"]
+
+    #  Load template map to annotate critical status
+    template_map = {
+        t.question: t.is_critical
+        for t in SecurityChecklistTemplate.objects.all()
+    }
+
+    for item in all_items:
+        item.is_critical = template_map.get(item.question, False)
+
+    # Group all other categories normally
+    checklist_by_category = {
+        category: [item for item in all_items if item.category == category]
+        for category in categories if category != "Compliance"
+    }
+
+    # Special handling for Compliance: group by standard
+    compliance_items = [item for item in all_items if item.category == "Compliance"]
+    compliance_by_standard = {}
+
+    for item in compliance_items:
+        try:
+            standard = next(
+                (t.compliance_standard for t in SecurityChecklistTemplate.objects.filter(question=item.question)), 
+                "Uncategorized"
+            ) or "Uncategorized"
+            compliance_by_standard.setdefault(standard, []).append(item)
+        except:
+            compliance_by_standard.setdefault("Unmapped", []).append(item)
+
+    # STEP 3: Handle form submission
     if request.method == "POST":
-        for key, value in request.POST.items():
-            if key.startswith("response_"):
-                response_id = key.split("_")[1]  # Extract question ID
-                vendor_response = get_object_or_404(VendorResponse, id=response_id)
-                vendor_response.response = value
-                vendor_response.save()
-        messages.success(request, "Responses submitted successfully! Please proceed with your risk assessment")
+        for item in all_items:
+            answer = request.POST.get(f"response_{item.id}")
+            if answer:
+                item.response = answer
+                item.status = "Completed"
+                item.save()
+
+        messages.success(request, "Checklist responses saved successfully. Please proceed with your risk assessment.")
         return redirect("home")
 
-    # Fetch all assigned questions for this vendor
-    assigned_questions = VendorResponse.objects.filter(vendor=vendor)
+    # STEP 4: Render the questionnaire
+    return render(request, "questionnaire.html", {
+        "checklist_by_category": checklist_by_category,
+        "compliance_by_standard": compliance_by_standard,
+        "categories": categories
+    })
 
-    # Fetch General & Legal questions missing from the vendor
-    missing_general_legal_questions = QuestionBank.objects.filter(
-        category__in=["General", "Legal"], 
-        vendor_type__isnull=True
-    ).exclude(id__in=assigned_questions.values_list("question__id", flat=True))
 
-    # Assign missing General & Legal questions
-    for question in missing_general_legal_questions:
-        VendorResponse.objects.get_or_create(vendor=vendor, question=question, defaults={"response": "N/A"})
 
-    if not assigned_questions.exists():
-        # ✅ Fetch vendor-specific questions
-        vendor_specific_questions = QuestionBank.objects.filter(
-            vendor_type=vendor.vendor_type,
-            min_employees__lte=vendor.num_clients,
-            max_employees__gte=vendor.num_clients
-        ).distinct()
-
-        # ✅ Fetch General & Legal questions (which apply to all vendors)
-        general_legal_questions = QuestionBank.objects.filter(
-            category__in=["General", "Legal"], 
-            vendor_type__isnull=True
-        ).distinct()
-
-        # ✅ Merge without using union()
-        relevant_questions = list(chain(vendor_specific_questions, general_legal_questions))
-
-        # ✅ Preserve General & Legal questions during filtering
-        if vendor.certified == "yes":
-            relevant_questions = [q for q in relevant_questions if 
-                q.required_certifications.filter(id__in=vendor.certifications.values_list("id", flat=True)).exists()
-            ] + list(general_legal_questions)
-
-        if hasattr(vendor, "security_profile") and vendor.security_profile.mfa:
-            relevant_questions = [q for q in relevant_questions if q.requires_mfa] + list(general_legal_questions)
-
-        # ✅ Assign all relevant questions in VendorResponse
-        for question in set(relevant_questions):  # Ensures uniqueness
-            VendorResponse.objects.get_or_create(vendor=vendor, question=question, defaults={"response": "N/A"})
-
-    # Fetch assigned questions again for display
-    assigned_questions = VendorResponse.objects.filter(vendor=vendor)
-
-    return render(request, "questionnaire.html", {"form_list": assigned_questions})
 
 # Other Views
 @login_required
@@ -401,7 +469,7 @@ def alerts(request):
     return render(request, 'alerts.html', {'user_role': request.user.role})
 
 @login_required
-def settings(request):
+def user_settings_view(request):
     return render(request, 'settings.html', {'user_role': request.user.role})
 
 @login_required
@@ -435,47 +503,41 @@ def terms(request):
 
 @login_required
 def generate_pdf(request, vendor_id):
+    
+    
     vendor = get_object_or_404(Vendor, id=vendor_id)
-    risk_assessment = RiskAssessment.objects.filter(vendor=vendor).first()
-
-    # Define scoring system for responses
-    responses = VendorResponse.objects.filter(vendor=vendor)
-    SCORE_MAPPING = {
-        "Yes": 0,
-        "No": 10,
-        "Partial": 5,
-        "N/A": 0
-    }
-
-    # Category weights
+    SCORE_MAPPING = {"Yes": 0, "No": 10, "Partial": 5, "N/A": 0}
     CATEGORY_WEIGHTS = {
-        "Technical": 40,
-        "Compliance": 20,
-        "Legal": 15,
-        "General": 15,
-        "Operational": 10,
+        "Technical": 40, "Compliance": 20, "Legal": 15,
+        "General": 15, "Operational": 10,
     }
 
-    # Calculate scores for each category
-    category_scores = {category: 0 for category in CATEGORY_WEIGHTS}
-    category_totals = {category: 0 for category in CATEGORY_WEIGHTS}
+    responses = SecurityChecklist.objects.filter(vendor=vendor, response__isnull=False)
+    category_scores = {cat: 0 for cat in CATEGORY_WEIGHTS}
+    category_totals = {cat: 0 for cat in CATEGORY_WEIGHTS}
+    critical_findings = []
 
-    for response in responses:
-        category = response.question.category
-        score = SCORE_MAPPING.get(response.response, 0)
-        category_scores[category] += score
-        category_totals[category] += 10
+    for item in responses:
+        category = item.category
+        score = SCORE_MAPPING.get(item.response, 0)
 
-    # Weighted scores calculation
-    weighted_scores = {}
-    for category, total_score in category_scores.items():
-        max_possible_score = category_totals[category] or 1
-        weighted_scores[category] = (total_score / max_possible_score) * CATEGORY_WEIGHTS[category]
+        # Check critical
+        template = SecurityChecklistTemplate.objects.filter(question=item.question).first()
+        if template and template.is_critical:
+            score *= 1.5
+            critical_findings.append(item)
 
-    # Overall weighted risk score
+        if category in category_scores:
+            category_scores[category] += score
+            category_totals[category] += 10
+
+    weighted_scores = {
+        category: (category_scores[category] / (category_totals[category] or 1)) * CATEGORY_WEIGHTS[category]
+        for category in CATEGORY_WEIGHTS
+    }
+
     weighted_risk_score = sum(weighted_scores.values())
 
-    # Risk level determination
     if weighted_risk_score <= 20:
         risk_level = "Low"
     elif 20 < weighted_risk_score <= 50:
@@ -483,40 +545,50 @@ def generate_pdf(request, vendor_id):
     else:
         risk_level = "High"
 
-    # 🎨 Generate Pie Chart as a base64 image
-    plt.figure(figsize=(6, 6))
+    # Generate Pie Chart
+    plt.figure(figsize=(6, 6), tight_layout=True)
     labels = list(weighted_scores.keys())
     sizes = list(weighted_scores.values())
-    colors = ['#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3', '#a6d854']
+    colors = ['#28a745', '#ffc107', '#dc3545', '#36b9cc', '#6f42c1']
 
-    wedges, texts, autotexts = plt.pie(sizes, colors=colors, autopct='%1.1f%%', startangle=90, textprops=dict(color="white"))
-    plt.legend(wedges, labels, title="Categories", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
-    plt.title('Category-wise Risk Scores', pad=20)
-    plt.gca().set_aspect('equal', adjustable='box')
+    plt.pie(
+        sizes,
+        labels=labels,
+        colors=colors,
+        autopct='%1.1f%%',
+        startangle=140,
+        textprops={'color': 'black', 'fontsize': 10}
+    )
+    plt.title("Category-wise Risk Distribution", pad=20, fontsize=14)
+    plt.gca().set_aspect('equal')
 
-    # Save chart to a bytes buffer
     buffer = BytesIO()
     plt.savefig(buffer, format='png', bbox_inches='tight')
     plt.close()
     buffer.seek(0)
     image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-    # Render HTML template for PDF
-    html = render_to_string('risk_assessment_pdf.html', {
-        "vendor": vendor,
-        "weighted_risk_score": weighted_risk_score,
-        "risk_level": risk_level,
-        "weighted_scores": weighted_scores,
-        "category_weights": CATEGORY_WEIGHTS,
-        "responses": responses,
-        "chart_image": image_base64,
-        "current_date": datetime.now().strftime('%Y-%m-%d'),
-        "current_year": datetime.now().year,
-    })
+    logo_path = os.path.join(settings.BASE_DIR, 'vendor_risk', 'static', 'images', 'landscape.png')
+    
+    with open(logo_path, 'rb') as logo_file:
+        logo_base64 = base64.b64encode(logo_file.read()).decode('utf-8')
 
-    # Generate PDF from HTML
+# Render PDF HTML
+    html = render_to_string('risk_assessment_pdf.html', {
+    "vendor": vendor,
+    "weighted_risk_score": weighted_risk_score,
+    "risk_level": risk_level,
+    "weighted_scores": weighted_scores,
+    "category_weights": CATEGORY_WEIGHTS,
+    "responses": responses,
+    "critical_findings": critical_findings,
+    "chart_image": image_base64,
+        "current_date": datetime.now().strftime('%Y-%m-%d'),
+    "current_year": datetime.now().year,
+    "riskavant_logo_base64": logo_base64,
+})
+
     response = HttpResponse(content_type="application/pdf")
     response['Content-Disposition'] = f'inline; filename={vendor.name}_risk_report.pdf'
-    pdf = weasyprint.HTML(string=html).write_pdf()
-    response.write(pdf)
+    response.write(weasyprint.HTML(string=html).write_pdf())
     return response

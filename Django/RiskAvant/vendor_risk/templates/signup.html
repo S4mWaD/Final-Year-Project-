@@ -5,123 +5,536 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="RiskAvant - Sign Up">
+    <meta name="author" content="RiskAvant">
     <title>Sign Up - RiskAvant</title>
     {% load static %}
     <!-- Custom fonts for this template -->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{% static 'css/home.css' %}" rel="stylesheet">
+        <style>
+        :root {
+            /* Enhanced color palette with dark theme */
+            --primary: #4f46e5;
+            --primary-hover: #6366f1;
+            --secondary: #9ca3af;
+            --success: #10b981;
+            --danger: #ef4444;
+            
+            /* Dark theme colors */
+            --dark: #1a202c;
+            --light: #2d3748;
+            --card-bg: #1e293b;
+            --text-primary: #f3f4f6;
+            --text-secondary: #d1d5db;
+            --border-color: #4b5563;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+            
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition: 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #111827 0%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+        }
+
+        .signup-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        .signup-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            min-height: 650px;
+        }
+
+        .signup-banner {
+            background: linear-gradient(135deg, #1b3654 0%, #0d1b2a 100%);
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signup-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(255,255,255,0.05)' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .signup-banner img {
+            max-height: 180px;
+            max-width: 100%;
+            object-fit: contain;
+            display: block;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
+        }
+
+        .banner-text {
+            color: #ffffff;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .banner-text h2 {
+            font-weight: 600;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .banner-text p {
+            font-weight: 300;
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .signup-form-container {
+            padding: 40px;
+            width: 55%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .signup-header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .signup-header p {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary);
+        }
+
+        .input-group input {
+            padding: 12px 15px 12px 45px;
+            width: 100%;
+            height: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .custom-control {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .custom-control-input {
+            position: absolute;
+            z-index: -1;
+            opacity: 0;
+        }
+
+        .custom-control-label {
+            position: relative;
+            margin-bottom: 0;
+            vertical-align: top;
+            padding-left: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .custom-control-label::before {
+            position: absolute;
+            top: 0.1rem;
+            left: 0;
+            display: block;
+            width: 20px;
+            height: 20px;
+            content: "";
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .custom-control-input:checked ~ .custom-control-label::before {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .custom-control-label::after {
+            position: absolute;
+            top: 0.1rem;
+            left: 0;
+            display: block;
+            width: 20px;
+            height: 20px;
+            content: "";
+            background: no-repeat 50%/50% 50%;
+        }
+
+        .custom-control-input:checked ~ .custom-control-label::after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
+        }
+
+        .signup-button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            font-weight: 500;
+            font-size: 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .signup-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .signup-button:active {
+            transform: translateY(0);
+        }
+
+        .signup-button i {
+            margin-right: 8px;
+        }
+
+        .signup-footer {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .signup-footer p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .signup-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .signup-footer a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            color: #f87171;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .error-message li {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            list-style-type: none;
+        }
+
+        .error-message i {
+            margin-right: 8px;
+        }
+
+        hr {
+            border: none;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 30px 0;
+        }
+
+        /* Django form styling */
+        .user p {
+            margin-bottom: 20px;
+        }
+
+        .user p label {
+            font-weight: 500;
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .user p input {
+            padding: 12px 15px;
+            width: 100%;
+            height: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .user p input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .user p input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        /* Add icons to Django form inputs */
+        .user p {
+            position: relative;
+        }
+
+        .user p:nth-of-type(1)::before {
+            content: '\f007';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 15px;
+            top: 42px;
+            color: var(--secondary);
+            z-index: 1;
+        }
+
+        .user p:nth-of-type(2)::before {
+            content: '\f0e0';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 15px;
+            top: 42px;
+            color: var(--secondary);
+            z-index: 1;
+        }
+
+        .user p:nth-of-type(3)::before {
+            content: '\f023';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 15px;
+            top: 42px;
+            color: var(--secondary);
+            z-index: 1;
+        }
+
+        .user p:nth-of-type(4)::before {
+            content: '\f023';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 15px;
+            top: 42px;
+            color: var(--secondary);
+            z-index: 1;
+        }
+
+        .user p input {
+            padding-left: 45px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .signup-card {
+                flex-direction: column;
+                height: auto;
+                max-width: 500px;
+            }
+
+            .signup-banner {
+                width: 100%;
+                padding: 30px;
+            }
+
+            .signup-form-container {
+                width: 100%;
+                padding: 30px;
+            }
+
+            .signup-banner img {
+                max-height: 120px;
+                margin-bottom: 15px;
+            }
+
+            .banner-text h2 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .signup-form-container {
+                padding: 25px 20px;
+            }
+
+            .signup-header h1 {
+                font-size: 26px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .signup-form-container {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
 </head>
-<style>
-    .user label {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 5px;
-    }
 
-    .user input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 14px;
-        margin-bottom: 10px;
-    }
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <!-- Banner Section -->
+            <div class="signup-banner">
+                <img src="{% static 'images/portrait.png' %}" alt="RiskAvant Logo">
+                <div class="banner-text">
+                    <h2>RiskAvant</h2>
+                    <p>Join our advanced risk management platform and secure your business today</p>
+                </div>
+            </div>
 
-    .form-group {
-        margin-bottom: 15px;
-    }
+            <!-- Form Section -->
+            <div class="signup-form-container">
+                <div class="signup-header">
+                    <h1>Create Your Account</h1>
+                    <p>Fill in your details to get started with RiskAvant</p>
+                </div>
 
-    .btn-primary {
-        background-color: #4e73df;
-        border: none;
-        padding: 10px;
-        font-size: 16px;
-        width: 100%;
-        color: white;
-        border-radius: 5px;
-        cursor: pointer;
-    }
+                {% if messages %}
+                <div class="error-message">
+                    {% for message in messages %}
+                    <li><i class="fas fa-exclamation-circle"></i> {{ message }}</li>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
-    .btn-primary:hover {
-        background-color: #2e59d9;
-    }
-
-    .custom-control {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .text-center a {
-        color: #4e73df;
-        text-decoration: none;
-    }
-
-    .text-center a:hover {
-        text-decoration: underline;
-    }
-
-    /* Adjust form width for better alignment */
-    .col-lg-7 {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    form.user {
-        width: 100%;
-        max-width: 400px;
-    }
-</style>
-
-<body class="bg-gradient-primary">
-    <div class="container">
-        <div class="card o-hidden border-0 shadow-lg my-5">
-            <div class="card-body p-0">
-                <div class="row">
-                    <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
-                    <div class="col-lg-7">
-                        <div class="p-5">
-                            <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
-                            </div>
-                            {% if messages %}
-                            <ul class="text-danger">
-                                {% for message in messages %}
-                                <li>{{ message }}</li>
-                                {% endfor %}
-                            </ul>
-                            {% endif %}
-                            <form class="user" method="post" action="{% url 'signup' %}">
-                                {% csrf_token %}
-                                {{ form.as_p }}
-                                <div class="form-group">
-                                    <div class="custom-control custom-checkbox small">
-                                        <input type="checkbox" class="custom-control-input" id="customCheck" required>
-                                        <label class="custom-control-label" for="customCheck">I accept the <a href="{% url 'terms' %}" target="_blank">Terms and Conditions</a></label>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary btn-user btn-block">Register Account</button>
-                            </form>
-                            <hr>
-                            <div class="text-center">
-                                <a class="small" href="{% url 'password_reset' %}">Forgot Password?</a>
-                            </div>
-                            <div class="text-center">
-                                <a class="small" href="{% url 'login' %}">Already have an account? Login!</a>
-                            </div>
-                        </div>
+                <form class="user" method="post" action="{% url 'signup' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="customCheck" required>
+                        <label class="custom-control-label" for="customCheck">
+                            I accept the <a href="{% url 'terms' %}" target="_blank">Terms and Conditions</a>
+                        </label>
                     </div>
+                    
+                    <button type="submit" class="signup-button">
+                        <i class="fas fa-user-plus"></i> Register Account
+                    </button>
+                </form>
+                
+                <hr>
+                
+                <div class="signup-footer">
+                    <p><a href="{% url 'password_reset' %}"><i class="fas fa-key"></i> Forgot Password?</a></p>
+                    <p>Already have an account? <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Login</a></p>
                 </div>
             </div>
         </div>
     </div>
+
     <!-- Bootstrap core JavaScript -->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>

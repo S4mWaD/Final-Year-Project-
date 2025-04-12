@@ -119,6 +119,13 @@ class SecurityChecklist(models.Model):
     status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed')], default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    category = models.CharField(max_length=50,choices= [
+        ('General', 'General'),
+        ('Technical', 'Technical'),
+        ('Compliance', 'Compliance'),
+        ('Legal', 'Legal'),
+        ('Operational', 'Operational')
+    ], blank=True, null=True)
 
     def __str__(self):
         return f"Checklist for {self.vendor.name}"
@@ -191,3 +198,17 @@ class VendorResponse(models.Model):
 
     def __str__(self):
         return f"{self.vendor.name} - {self.question.question_text[:50]}"
+
+
+class SecurityChecklistTemplate(models.Model):
+    VENDOR_TYPE_CHOICES = list(Vendor.VENDOR_TYPES) + [('Any', 'Any')]
+
+    question = models.TextField()
+    category = models.CharField(max_length=50, choices=QuestionBank.QUESTION_CATEGORIES)
+    is_critical = models.BooleanField(default=False)
+    vendor_type = models.CharField(max_length=50, choices=VENDOR_TYPE_CHOICES, default="Any")
+    standard_required = models.BooleanField(default=False)
+    compliance_standard = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"[{self.category}] {self.question[:50]}"

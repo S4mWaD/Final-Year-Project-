@@ -15,7 +15,7 @@ urlpatterns = [
     
     # New routes for additional features
     path('alerts/', views.alerts, name='alerts'),
-    path('settings/', views.settings, name='settings'),
+    path('settings/', views.user_settings_view, name='settings'),
     path('dashboard/', views.admin_dashboard, name='dashboard'),
     path('risk-list/', views.risk_list, name='risk-list'),
     path('checklist-list/', views.checklist_list, name='checklist-list'),

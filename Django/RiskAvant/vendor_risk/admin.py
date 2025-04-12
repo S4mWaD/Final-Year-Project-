@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Vendor, RiskAssessment, Certification, SecurityProfile, QuestionBank
+from .models import CustomUser, Vendor, RiskAssessment, Certification, SecurityChecklistTemplate, QuestionBank, SecurityChecklist
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -33,4 +33,15 @@ class QuestionBankAdmin(admin.ModelAdmin):
     list_display = ('question_text', 'vendor_type')
     search_fields = ('question_text', 'vendor_type')
     ordering = ('question_text',)
-    
+
+@admin.register(SecurityChecklistTemplate)
+class SecurityChecklistTemplateAdmin(admin.ModelAdmin):
+    list_display = ('question', 'category', 'is_critical', 'vendor_type', 'standard_required', 'compliance_standard')
+    search_fields = ('question', 'category', 'vendor_type', 'compliance_standard')
+    ordering = ('question',)
+
+@admin.register(SecurityChecklist)
+class SecurityChecklistAdmin(admin.ModelAdmin):
+    list_display = ('vendor', 'question', 'response', 'status', 'created_at')
+    search_fields = ('vendor__name', 'question', 'response', 'status')
+    list_filter = ('status', 'created_at')

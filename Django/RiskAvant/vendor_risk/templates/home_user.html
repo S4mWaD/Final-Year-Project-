@@ -8,186 +8,849 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>RiskAvant - User Home</title>
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/home.css' %}" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #f8f9fc;
+        :root {
+            /* Enhanced color palette with dark theme */
+            --primary: #4f46e5;
+            --primary-hover: #6366f1;
+            --secondary: #9ca3af;
+            --success: #10b981;
+            --success-hover: #34d399;
+            --info: #06b6d4;
+            --info-hover: #22d3ee;
+            --warning: #f59e0b;
+            --warning-hover: #fbbf24;
+            --danger: #ef4444;
+            --danger-hover: #f87171;
+            
+            /* Dark theme colors */
+            --dark: #1a202c;
+            --light: #2d3748;
+            --card-bg: #1e293b;
+            --text-primary: #f3f4f6;
+            --text-secondary: #d1d5db;
+            --border-color: #4b5563;
+            
+            /* Enhanced background gradients */
+            --sidebar-bg-start: #1e1e2d;
+            --sidebar-bg-end: #0f172a;
+            --topbar-bg: #1a1c2d;
+            --content-bg: #111827;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+            
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition: 0.3s ease;
         }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--content-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color var(--transition);
+        }
+
+        #wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        #content-wrapper {
+            width: 100%;
+            background-color: var(--content-bg);
+            overflow-x: hidden;
+            transition: background-color var(--transition);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 14rem;
+            min-height: 100vh;
+            transition: width var(--transition), background-color var(--transition);
+            box-shadow: var(--shadow);
+            z-index: 100;
+            background-color: var(--sidebar-bg-start);
+            background-image: linear-gradient(180deg, var(--sidebar-bg-start) 10%, var(--sidebar-bg-end) 100%);
+        }
+
+        .sidebar .nav-item {
+            position: relative;
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar .nav-item .nav-link {
+            padding: 0.85rem 1.25rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            border-radius: 0.5rem;
+            margin: 0 0.5rem;
+            transition: all var(--transition-fast);
+        }
+
+        .sidebar .nav-item .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+        }
+
+        .sidebar .nav-item .nav-link i {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+            transition: transform var(--transition-fast);
+        }
+
+        .sidebar .nav-item .nav-link:hover i {
+            transform: scale(1.1);
+        }
+
+        .sidebar .nav-item.active .nav-link {
+            color: #fff;
+            font-weight: 700;
+            background-color: rgba(79, 70, 229, 0.2);
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.1);
+            border-left: 3px solid var(--primary);
+        }
+
+        .sidebar-brand {
+            height: 4.375rem;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 1.5rem 1rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-brand-icon {
+            font-size: 1.4rem;
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+
+        .sidebar-brand-text {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0.5rem 1rem 1rem;
+        }
+
+        .sidebar-heading {
+            padding: 0 1rem;
+            font-weight: 800;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin: 1rem 0 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .rotate-n-15 {
+            transform: rotate(-15deg);
+        }
+
+        /* Topbar Styles */
+        .topbar {
+            height: 4.375rem;
+            background-color: var(--topbar-bg);
+            box-shadow: var(--shadow);
+            z-index: 99;
+            transition: background-color var(--transition);
+        }
+
+        .topbar .navbar-search {
+            width: 25rem;
+        }
+
+        .topbar .navbar-search input {
+            font-size: 0.9rem;
+            height: 2.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding-left: 1rem;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .topbar .navbar-search input:focus {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+        }
+
+        .topbar .navbar-search input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .topbar .topbar-divider {
+            width: 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            height: calc(4.375rem - 2rem);
+            margin: auto 1rem;
+        }
+
+        .topbar .nav-item .nav-link {
+            height: 4.375rem;
+            display: flex;
+            align-items: center;
+            padding: 0 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            position: relative;
+            transition: color var(--transition-fast);
+        }
+
+        .topbar .nav-item .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .topbar .nav-item .nav-link .badge-counter {
+            position: absolute;
+            transform: scale(0.85);
+            transform-origin: top right;
+            right: 0.25rem;
+            top: 0.25rem;
+        }
+
+        .dropdown .dropdown-menu {
+            font-size: 0.85rem;
+            padding: 0.5rem 0;
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            animation: dropdown-animation 0.2s ease-out;
+        }
+
+        @keyframes dropdown-animation {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1.2rem;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--primary);
+            transform: translateX(3px);
+        }
+
+        .dropdown-item i {
+            margin-right: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .img-profile {
+            height: 2.5rem;
+            width: 2.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 2px;
+            border-radius: 50%;
+            transition: all var(--transition-fast);
+        }
+
+        .img-profile:hover {
+            border-color: var(--primary);
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h6 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .card-header .dropdown {
+            margin-left: auto;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            font-weight: 600;
+            border: 1px solid transparent;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            border-radius: 0.5rem;
+            transition: all var(--transition-fast);
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.25);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            border-color: var(--success);
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+            border-color: var(--success-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-light {
+            background-color: var(--light);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .btn-light:hover {
+            background-color: #3d4a61;
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* Alert Styles */
+        .alert {
+            position: relative;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid transparent;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .alert-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .alert-info {
+            background-color: rgba(6, 182, 212, 0.1);
+            border-color: rgba(6, 182, 212, 0.2);
+            color: var(--info);
+        }
+
+        /* Text Colors */
+        .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .text-success {
+            color: var(--success) !important;
+        }
+
+        .text-warning {
+            color: var(--warning) !important;
+        }
+
+        .text-info {
+            color: var(--info) !important;
+        }
+
+        .text-secondary {
+            color: var(--secondary) !important;
+        }
+
+        /* Footer */
+        .sticky-footer {
+            padding: 1.5rem 0;
+            flex-shrink: 0;
+            background-color: var(--topbar-bg);
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Dashboard specific styles */
         .dashboard-heading {
             font-weight: 700;
-            color: #4e73df;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.75rem;
         }
 
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        .walkthrough-item {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            transition: all var(--transition-fast);
         }
 
-        .btn i {
-            margin-right: 6px;
+        .walkthrough-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .walkthrough-item i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            transition: transform var(--transition-fast);
+        }
+
+        .walkthrough-item:hover i {
+            transform: scale(1.1);
+        }
+
+        .walkthrough-item p {
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 14rem !important;
+            }
+            
+            .sidebar.toggled {
+                width: 6.5rem !important;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link {
+                padding: 1rem;
+                text-align: center;
+                border-radius: 0.5rem;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link span {
+                display: none;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link i {
+                margin-right: 0;
+                font-size: 1.25rem;
+            }
+            
+            .sidebar.toggled .sidebar-brand .sidebar-brand-text {
+                display: none;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .sidebar {
+                width: 6.5rem !important;
+            }
+            
+            .sidebar .nav-item .nav-link {
+                padding: 1rem;
+                text-align: center;
+                border-radius: 0.5rem;
+            }
+            
+            .sidebar .nav-item .nav-link span {
+                display: none;
+            }
+            
+            .sidebar .nav-item .nav-link i {
+                margin-right: 0;
+                font-size: 1.25rem;
+            }
+            
+            .sidebar .sidebar-brand .sidebar-brand-text {
+                display: none;
+            }
+            
+            .sidebar.toggled {
+                width: 14rem !important;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link {
+                padding: 0.85rem 1.25rem;
+                text-align: left;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link span {
+                display: inline;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link i {
+                margin-right: 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .sidebar.toggled .sidebar-brand .sidebar-brand-text {
+                display: inline;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--light);
+            border-radius: 4px;
+            transition: background var(--transition-fast);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
         }
     </style>
 </head>
 
 <body id="page-top">
-<div id="wrapper">
-    <!-- Sidebar -->
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
-            <div class="sidebar-brand-icon rotate-n-15">
-                <i class="fas fa-shield-alt"></i>
-            </div>
-            <div class="sidebar-brand-text mx-3">RiskAvant</div>
-        </a>
-
-        <hr class="sidebar-divider my-0">
-        <li class="nav-item active">
-            <a class="nav-link" href="#">
-                <i class="fas fa-fw fa-home"></i>
-                <span>User Home</span>
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">RiskAvant</div>
             </a>
-        </li>
 
-        <hr class="sidebar-divider">
-        <div class="sidebar-heading">Vendor Tools</div>
-        <li class="nav-item"><a class="nav-link" href="{% url 'vendor-list' %}"><i class="fas fa-building"></i> <span>Vendors</span></a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'risk-list' %}"><i class="fas fa-exclamation-triangle"></i> <span>Risk Assessments</span></a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'checklist-list' %}"><i class="fas fa-tasks"></i> <span>Checklists</span></a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'compliance' %}"><i class="fas fa-file-contract"></i> <span>Compliance</span></a></li>
+            <hr class="sidebar-divider my-0">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>User Home</span>
+                </a>
+            </li>
 
-        <!-- Sidebar Toggler -->
-        <div class="text-center d-none d-md-inline mt-3">
-            <button class="btn btn-light btn-sm" id="sidebarToggle">
-                <i class="fas fa-angle-left"></i>
-            </button>
-        </div>
-    </ul>
-    <!-- End Sidebar -->
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading">Vendor Tools</div>
+            <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}"><i class="fas fa-building"></i> <span>Profile</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'risk-list' %}"><i class="fas fa-exclamation-triangle"></i> <span>Risk Assessments</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'checklist-list' %}"><i class="fas fa-tasks"></i> <span>Checklists</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'compliance' %}"><i class="fas fa-file-contract"></i> <span>Compliance</span></a></li>
 
-    <!-- Content Wrapper -->
-    <div id="content-wrapper" class="d-flex flex-column">
-        <div id="content">
-            <!-- Topbar -->
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                <button id="sidebarToggleTop" class="btn btn-link d-md-none"><i class="fa fa-bars"></i></button>
+            <!-- Sidebar Toggler -->
+            <div class="text-center d-none d-md-inline mt-3">
+                <button class="btn btn-light btn-sm" id="sidebarToggle">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+        </ul>
+        <!-- End Sidebar -->
 
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item dropdown no-arrow">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
-                            <span class="mr-2 text-gray-600 small">{{ user.username }}</span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>Profile</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>Logout</a>
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none"><i class="fa fa-bars text-white"></i></button>
+
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                                <span class="mr-2 text-gray-300 small">{{ user.username }}</span>
+                                <i class="fas fa-user-circle fa-fw text-gray-300"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user fa-sm fa-fw mr-2"></i>Profile</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- End Topbar -->
+
+                <!-- Main Content -->
+                <div class="container-fluid pt-3 fade-in">
+                    <h2 class="dashboard-heading text-center mb-4">Welcome, {{ user.username }}</h2>
+
+                    {% if onboarding_complete %}
+                    <div class="alert alert-success shadow-sm" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i> Onboarding complete! You can now generate your security questionnaire.
+                    </div>
+                    <div class="text-center mb-4">
+                        <a href="{% url 'questionnaire' %}" class="btn btn-primary"><i class="fas fa-file-alt mr-2"></i> Generate Questionnaire</a>
+                    </div>
+                    {% endif %}
+
+                    {% if submitted_questionnaire %}
+                    <div class="alert alert-info shadow-sm" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i> Questionnaire submitted! You may now view your Risk Assessment Report.
+                    </div>
+                    <div class="text-center mb-4">
+                        <a href="{% url 'risk_assessment' latest_assessment.id  %}" class="btn btn-success"><i class="fas fa-shield-alt mr-2"></i> View Risk Report</a>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header">
+                                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-chart-line mr-2"></i>Your Assessment Status</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="mr-3" style="width: 40px; text-align: center;">
+                                            <i class="fas fa-user-check fa-lg {% if onboarding_complete %}text-success{% else %}text-secondary{% endif %}"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 font-weight-bold">Onboarding</h6>
+                                            <p class="mb-0 small">
+                                                <span class="badge {% if onboarding_complete %}bg-success text-white{% else %}bg-secondary text-white{% endif %} px-2 py-1">
+                                                    {{ onboarding_complete|yesno:"Complete,Incomplete" }}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="mr-3" style="width: 40px; text-align: center;">
+                                            <i class="fas fa-tasks fa-lg {% if submitted_questionnaire %}text-success{% else %}text-secondary{% endif %}"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 font-weight-bold">Questionnaire</h6>
+                                            <p class="mb-0 small">
+                                                <span class="badge {% if submitted_questionnaire %}bg-success text-white{% else %}bg-secondary text-white{% endif %} px-2 py-1">
+                                                    {{ submitted_questionnaire|yesno:"Submitted,Pending" }}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3" style="width: 40px; text-align: center;">
+                                            <i class="fas fa-shield-alt fa-lg {% if submitted_questionnaire %}text-success{% else %}text-secondary{% endif %}"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 font-weight-bold">Risk Assessment</h6>
+                                            <p class="mb-0 small">
+                                                <span class="badge {% if submitted_questionnaire %}bg-success text-white{% else %}bg-secondary text-white{% endif %} px-2 py-1">
+                                                    {% if submitted_questionnaire %}Completed{% else %}Pending{% endif %}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </li>
-                </ul>
-            </nav>
-            <!-- End Topbar -->
 
-            <!-- Main Content -->
-            <div class="container-fluid pt-3">
-                <h2 class="dashboard-heading text-center mb-4">Welcome, {{ user.username }}</h2>
-
-                {% if onboarding_complete %}
-                <div class="alert alert-success shadow-sm" role="alert">
-                    <i class="fas fa-check-circle mr-2"></i> 🎉 Onboarding complete! You can now generate your security questionnaire.
-                </div>
-                <div class="text-center mb-4">
-                    <a href="{% url 'questionnaire' %}" class="btn btn-primary"><i class="fas fa-file-alt"></i> Generate Questionnaire</a>
-                </div>
-                {% endif %}
-
-                {% if submitted_questionnaire %}
-                <div class="alert alert-info shadow-sm" role="alert">
-                    <i class="fas fa-check-circle mr-2"></i> Questionnaire submitted! You may now view your Risk Assessment Report.
-                </div>
-                <div class="text-center mb-4">
-                    <a href="{% url 'risk_assessment' vendor.id %}" class="btn btn-success"><i class="fas fa-shield-alt"></i> View Risk Report</a>
-                </div>
-                {% endif %}
-
-                <div class="row">
-                    <div class="col-lg-6 mb-4">
-                        <div class="card shadow">
-                            <div class="card-header text-primary font-weight-bold">Your Assessment Status</div>
-                            <div class="card-body">
-                                <p><i class="fas fa-user-check"></i> Onboarding: <strong>{{ onboarding_complete|yesno:"Complete,Incomplete" }}</strong></p>
-                                <p><i class="fas fa-tasks"></i> Questionnaire: <strong>{{ submitted_questionnaire|yesno:"Submitted,Pending" }}</strong></p>
-                                <p><i class="fas fa-shield-alt"></i> Risk Assessment: <strong>{% if submitted_questionnaire %}Completed{% else %}Pending{% endif %}</strong></p>
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header">
+                                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-bolt mr-2"></i>Quick Actions</h6>
+                                </div>
+                                <div class="card-body">
+                                    <a href="{% url 'vendor-list' %}" class="btn btn-light btn-block mb-3">
+                                        <i class="fas fa-building text-primary mr-2"></i> View Vendors
+                                    </a>
+                                    <a href="{% url 'checklist-list' %}" class="btn btn-light btn-block mb-3">
+                                        <i class="fas fa-tasks text-info mr-2"></i> View Checklists
+                                    </a>
+                                    <a href="{% url 'risk-list' %}" class="btn btn-light btn-block mb-3">
+                                        <i class="fas fa-exclamation-triangle text-warning mr-2"></i> Risk Assessments
+                                    </a>
+                                    <a href="{% url 'compliance' %}" class="btn btn-light btn-block">
+                                        <i class="fas fa-file-contract text-success mr-2"></i> Compliance
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-lg-6 mb-4">
-                        <div class="card shadow">
-                            <div class="card-header text-primary font-weight-bold">Quick Actions</div>
-                            <div class="card-body">
-                                <a href="{% url 'vendor-list' %}" class="btn btn-light btn-block mb-2"><i class="fas fa-building text-primary"></i> View Vendors</a>
-                                <a href="{% url 'checklist-list' %}" class="btn btn-light btn-block mb-2"><i class="fas fa-tasks text-info"></i> View Checklists</a>
-                                <a href="{% url 'risk-list' %}" class="btn btn-light btn-block mb-2"><i class="fas fa-exclamation-triangle text-warning"></i> Risk Assessments</a>
-                                <a href="{% url 'compliance' %}" class="btn btn-light btn-block"><i class="fas fa-file-contract text-success"></i> Compliance</a>
+                    <!-- Walkthrough Section -->
+                    <div class="card shadow mb-5">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-map-signs mr-2"></i>How to Use RiskAvant</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="walkthrough-item">
+                                        <i class="fas fa-user-plus text-primary"></i>
+                                        <p>Onboard Yourself</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="walkthrough-item">
+                                        <i class="fas fa-file-alt text-info"></i>
+                                        <p>Generate Questionnaire</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="walkthrough-item">
+                                        <i class="fas fa-chart-line text-warning"></i>
+                                        <p>Review Risk Score</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="walkthrough-item">
+                                        <i class="fas fa-cogs text-secondary"></i>
+                                        <p>Take Action</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!-- End Main Content -->
+            </div>
 
-                <!-- Walkthrough Section -->
-                <div class="card shadow mb-5">
-                    <div class="card-header font-weight-bold text-primary">How to Use RiskAvant</div>
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-3 mb-3"><i class="fas fa-user-plus fa-2x text-primary mb-2"></i><p>Add Vendors</p></div>
-                            <div class="col-md-3 mb-3"><i class="fas fa-file-alt fa-2x text-info mb-2"></i><p>Generate Questionnaire</p></div>
-                            <div class="col-md-3 mb-3"><i class="fas fa-chart-line fa-2x text-warning mb-2"></i><p>Review Risk Score</p></div>
-                            <div class="col-md-3 mb-3"><i class="fas fa-cogs fa-2x text-secondary mb-2"></i><p>Take Action</p></div>
-                        </div>
+            <!-- Footer -->
+            <footer class="sticky-footer">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>© 2025 RiskAvant. All rights reserved.</span>
                     </div>
                 </div>
-            </div>
-            <!-- End Main Content -->
+            </footer>
         </div>
-
-        <!-- Footer -->
-        <footer class="sticky-footer bg-white">
-            <div class="container my-auto">
-                <div class="copyright text-center my-auto">
-                    <span>© 2025 RiskAvant. All rights reserved.</span>
-                </div>
-            </div>
-        </footer>
     </div>
-</div>
-<script>
-    // Sidebar toggler (bottom left)
-    const sidebarToggleBtn = document.getElementById('sidebarToggle');
-    const sidebar = document.querySelector('.sidebar');
-    const body = document.body;
 
-    if (sidebarToggleBtn) {
-        sidebarToggleBtn.addEventListener('click', function () {
-            sidebar.classList.toggle('toggled');
-            body.classList.toggle('sidebar-toggled');
-        });
-    }
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Sidebar toggler (bottom left)
+        const sidebarToggleBtn = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const body = document.body;
 
-    // Optional: for topbar toggle (on mobile)
-    const sidebarToggleTop = document.getElementById('sidebarToggleTop');
-    if (sidebarToggleTop) {
-        sidebarToggleTop.addEventListener('click', function () {
-            sidebar.classList.toggle('toggled');
-            body.classList.toggle('sidebar-toggled');
-        });
-    }
-</script>
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        if (sidebarToggleBtn) {
+            sidebarToggleBtn.addEventListener('click', function () {
+                sidebar.classList.toggle('toggled');
+                body.classList.toggle('sidebar-toggled');
+            });
+        }
+
+        // Optional: for topbar toggle (on mobile)
+        const sidebarToggleTop = document.getElementById('sidebarToggleTop');
+        if (sidebarToggleTop) {
+            sidebarToggleTop.addEventListener('click', function () {
+                sidebar.classList.toggle('toggled');
+                body.classList.toggle('sidebar-toggled');
+            });
+        }
+    </script>
 </body>
 </html>

@@ -78,12 +78,27 @@ class VendorOnboardingForm(forms.ModelForm):
         label="Do you have certifications?"
     )
 
+    VENDOR_TYPES = [
+        ('Software', 'Software'),
+        ('Hardware', 'Hardware'),
+        ('Network', 'Network'),
+        ('Data Center', 'Data Center'),
+        ('Cloud', 'Cloud'),
+    ]
+
+    vendor_type = forms.ChoiceField(
+        choices=VENDOR_TYPES,
+        label="Vendor Type",
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['certifications'].queryset = Certification.objects.all()
 
     certifications = forms.ModelMultipleChoiceField(
-        queryset=Certification.objects.none(),  # Initialize as empty
+        queryset=Certification.objects.none(),
         widget=forms.CheckboxSelectMultiple(attrs={'id': 'certifications-container'}),
         required=False,
     )
