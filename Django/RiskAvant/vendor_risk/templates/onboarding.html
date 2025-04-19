@@ -7,115 +7,602 @@
     <title>Vendor Onboarding - RiskAvant</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <style>
-        body {
-            background-color: #f8f9fc;
-            font-family: 'Roboto', sans-serif;
+        :root {
+            /* Enhanced color palette with dark theme */
+            --primary: #4f46e5;
+            --primary-hover: #6366f1;
+            --secondary: #9ca3af;
+            --success: #10b981;
+            --success-hover: #34d399;
+            --danger: #ef4444;
+            --danger-hover: #f87171;
+            --info: #06b6d4;
+            
+            /* Dark theme colors */
+            --dark: #1a202c;
+            --light: #2d3748;
+            --card-bg: #1e293b;
+            --text-primary: #ffffff;
+            --text-secondary: #e2e8f0;
+            --border-color: #4b5563;
+            
+            /* Enhanced background gradients */
+            --sidebar-bg-start: #1e1e2d;
+            --sidebar-bg-end: #0f172a;
+            --topbar-bg: #1a1c2d;
+            --content-bg: #111827;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+            
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition: 0.3s ease;
         }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #111827 0%, #0f172a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: var(--topbar-bg) !important;
+            box-shadow: var(--shadow);
+            padding: 1rem 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--text-primary) !important;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
         .onboarding-container {
             max-width: 900px;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
             margin: auto;
             margin-top: 50px;
+            margin-bottom: 50px;
+            transition: transform var(--transition-fast);
+            animation: fadeIn 0.6s ease-out;
         }
+
+        .onboarding-container:hover {
+            transform: translateY(-5px);
+        }
+
         h2 {
             text-align: center;
-            color: #4e73df;
-            font-weight: bold;
-            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 30px;
+            font-size: 28px;
         }
+
         fieldset {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: #f8f9fc;
+            margin-bottom: 30px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all var(--transition-fast);
         }
+
+        fieldset:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
         legend {
             font-size: 18px;
-            font-weight: bold;
-            color: #4e73df;
+            font-weight: 600;
+            color: #a78bfa; /* Brighter purple for better visibility */
+            padding: 0 10px;
+            background-color: var(--card-bg);
         }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 15px; /* Slightly larger for better readability */
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="url"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Brighter border */
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.07); /* Slightly lighter background */
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all var(--transition-fast);
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        input[type="url"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        input[type="text"]::placeholder,
+        input[type="email"]::placeholder,
+        input[type="tel"]::placeholder,
+        input[type="url"]::placeholder,
+        input[type="number"]::placeholder,
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5); /* Brighter placeholder text */
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            margin-right: 8px;
+            accent-color: var(--primary);
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px;
+        }
+
+        select[multiple] {
+            height: auto;
+            min-height: 120px;
+            background-image: none;
+            padding-right: 15px;
+        }
+
         .btn-group {
             display: flex;
             justify-content: center;
             gap: 15px;
+            margin-top: 30px;
         }
+
+        .btn-success {
+            background-color: var(--success);
+            border-color: var(--success);
+            color: #fff;
+            font-weight: 500;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: all var(--transition-fast);
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+            border-color: var(--success-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:active {
+            transform: translateY(0);
+        }
+
         ul.errorlist {
             list-style-type: none;
             padding: 0;
-            margin: 0;
+            margin: 0 0 15px 0;
+            color: var(--danger-hover); /* Brighter red for better visibility */
+            font-size: 14px;
+            background-color: rgba(239, 68, 68, 0.15); /* Slightly more visible background */
+            border-radius: 6px;
+            padding: 10px 15px;
         }
+
         ul.errorlist li {
-            color: red;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
         }
-        #certifications-container {
-            display: block;
+
+        ul.errorlist li:before {
+            content: "\f071";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            margin-right: 8px;
+        }
+
+        .alert-success {
+            background-color: rgba(16, 185, 129, 0.15); /* Slightly more visible */
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success-hover); /* Brighter green */
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-success:before {
+            content: "\f058";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        footer {
+            background-color: var(--topbar-bg) !important;
+            padding: 20px 0;
+            margin-top: auto;
+        }
+
+        /* Radio buttons styling */
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+        }
+
+        .radio-option label {
+            margin-bottom: 0;
+            margin-left: 5px;
+        }
+
+        /* Hide required field errors by default */
+        .field-required-error {
+            display: none;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--light);
+            border-radius: 4px;
+            transition: background var(--transition-fast);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Required field indicator (subtle asterisk) */
+        .required-field::after {
+            content: " *";
+            color: rgba(239, 68, 68, 0.7);
+            font-size: 14px;
+        }
+
+        /* Small helper text */
+        .text-muted {
+            color: rgba(255, 255, 255, 0.6) !important;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
-        <a class="navbar-brand fw-bold" href="#">RiskAvant Vendor Onboarding</a>
-        <a href="{% url 'dashboard' %}" class="btn btn-outline-light">Dashboard</a>
+    <nav class="navbar navbar-expand-lg navbar-dark px-4">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-shield-alt me-2"></i>RiskAvant Vendor Onboarding
+        </a>
+        <a href="{% url 'home' %}" class="btn btn-outline-light">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
     </nav>
 
-    <div class="onboarding-container">
-        <h2>Vendor Onboarding Form</h2>
+    <div class="container">
+        <div class="onboarding-container">
+            <h2><i class="fas fa-building me-2"></i>Vendor Onboarding Form</h2>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-success" role="alert">
-                    {{ message }}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" id="vendorForm">
+                {% csrf_token %}
+                <fieldset>
+                    <legend><i class="fas fa-info-circle me-2"></i>Vendor Details</legend>
+
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="required-field">{{ form.name.label }}</label>
+                        <div class="field-required-error" id="name-error">
+                            <ul class="errorlist">
+                                <li>This field is required.</li>
+                            </ul>
+                        </div>
+                        {% if form.name.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.name }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.vendor_type.id_for_label }}" class="required-field">{{ form.vendor_type.label }}</label>
+                        <div class="field-required-error" id="vendor-type-error">
+                            <ul class="errorlist">
+                                <li>This field is required.</li>
+                            </ul>
+                        </div>
+                        {% if form.vendor_type.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.vendor_type.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.vendor_type }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.contact_email.id_for_label }}" class="required-field">{{ form.contact_email.label }}</label>
+                        <div class="field-required-error" id="email-error">
+                            <ul class="errorlist">
+                                <li>This field is required.</li>
+                            </ul>
+                        </div>
+                        {% if form.contact_email.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.contact_email.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.contact_email }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.contact_phone.id_for_label }}" class="required-field">{{ form.contact_phone.label }}</label>
+                        <div class="field-required-error" id="phone-error">
+                            <ul class="errorlist">
+                                <li>This field is required.</li>
+                            </ul>
+                        </div>
+                        {% if form.contact_phone.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.contact_phone.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.contact_phone }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.address.id_for_label }}" class="required-field">{{ form.address.label }}</label>
+                        <div class="field-required-error" id="address-error">
+                            <ul class="errorlist">
+                                <li>This field is required.</li>
+                            </ul>
+                        </div>
+                        {% if form.address.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.address.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.address }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+                        {% if form.website.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.website.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.website }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.tax_id.id_for_label }}">{{ form.tax_id.label }}</label>
+                        {% if form.tax_id.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.tax_id.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.tax_id }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.business_license.id_for_label }}">{{ form.business_license.label }}</label>
+                        {% if form.business_license.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.business_license.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.business_license }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.years_in_operation.id_for_label }}" class="required-field">{{ form.years_in_operation.label }}</label>
+                        <div class="field-required-error" id="years-error">
+                            <ul class="errorlist">
+                                <li>This field is required.</li>
+                            </ul>
+                        </div>
+                        {% if form.years_in_operation.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.years_in_operation.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.years_in_operation }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.num_clients.id_for_label }}">{{ form.num_clients.label }}</label>
+                        {% if form.num_clients.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.num_clients.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.num_clients }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.annual_revenue.id_for_label }}">{{ form.annual_revenue.label }}</label>
+                        {% if form.annual_revenue.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.annual_revenue.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.annual_revenue }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.auditable.id_for_label }}">{{ form.auditable.label }}</label>
+                        {% if form.auditable.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.auditable.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.auditable }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.insurance_coverage.id_for_label }}">{{ form.insurance_coverage.label }}</label>
+                        {% if form.insurance_coverage.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.insurance_coverage.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.insurance_coverage }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="mb-2">Do you have certifications?</label>
+                        {% if form.certified.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.certified.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <div class="radio-group">
+                            {{ form.certified }}
+                        </div>
+                    </div>
+
+                    <div id="certifications-container" class="mb-3">
+                        <label>Select Certifications:</label>
+                        {% if form.certifications.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.certifications.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ form.certifications }}
+                        <small class="text-muted d-block mt-2">Hold Ctrl (or Cmd on Mac) to select multiple options</small>
+                    </div>
+                </fieldset>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success" id="submitBtn">
+                        <i class="fas fa-check me-2"></i> Submit Vendor Information
+                    </button>
                 </div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="post">
-            {% csrf_token %}
-            <fieldset>
-                <legend>Vendor Details</legend>
-
-                {{ form.name.label_tag }} {{ form.name }}
-                {{ form.vendor_type.label_tag }} {{ form.vendor_type }}
-                {{ form.contact_email.label_tag }} {{ form.contact_email }}
-                {{ form.contact_phone.label_tag }} {{ form.contact_phone }}
-                {{ form.address.label_tag }} {{ form.address }}
-                {{ form.website.label_tag }} {{ form.website }}
-                {{ form.tax_id.label_tag }} {{ form.tax_id }}
-                {{ form.business_license.label_tag }} {{ form.business_license }}
-                {{ form.years_in_operation.label_tag }} {{ form.years_in_operation }}
-                {{ form.num_clients.label_tag }} {{ form.num_clients }}
-                {{ form.annual_revenue.label_tag }} {{ form.annual_revenue }}
-                {{ form.auditable.label_tag }} {{ form.auditable }}
-                {{ form.insurance_coverage.label_tag }} {{ form.insurance_coverage }}
-
-                <br><label class="mt-3">Do you have certifications?</label><br>
-                {{ form.certified }}
-
-                <div id="certifications-container" class="mt-3">
-                    <label>Select Certifications:</label>
-                    {{ form.certifications }}
-                </div>
-            </fieldset>
-
-            <div class="btn-group">
-                <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Submit</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
-    <footer class="bg-primary text-light text-center py-3 mt-5">
+    <footer class="text-light text-center py-3">
         <p class="mb-0">&copy; 2025 RiskAvant. All Rights Reserved.</p>
     </footer>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Certification toggle functionality
             const certifiedRadios = document.querySelectorAll("input[name='certified']");
             const certificationsContainer = document.getElementById("certifications-container");
 
@@ -127,6 +614,59 @@
 
             certifiedRadios.forEach(radio => radio.addEventListener("change", toggleCertifications));
             toggleCertifications();
+
+            // Form validation - only show required errors on submit attempt
+            const form = document.getElementById('vendorForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Required fields
+            const requiredFields = [
+                { id: 'id_name', errorId: 'name-error' },
+                { id: 'id_vendor_type', errorId: 'vendor-type-error' },
+                { id: 'id_contact_email', errorId: 'email-error' },
+                { id: 'id_contact_phone', errorId: 'phone-error' },
+                { id: 'id_address', errorId: 'address-error' },
+                { id: 'id_years_in_operation', errorId: 'years-error' }
+            ];
+            
+            form.addEventListener('submit', function(e) {
+                let hasError = false;
+                
+                // Check each required field
+                requiredFields.forEach(field => {
+                    const input = document.getElementById(field.id);
+                    const errorElement = document.getElementById(field.errorId);
+                    
+                    if (!input.value.trim()) {
+                        errorElement.style.display = 'block';
+                        hasError = true;
+                    } else {
+                        errorElement.style.display = 'none';
+                    }
+                });
+                
+                // If there are errors, prevent form submission
+                if (hasError) {
+                    e.preventDefault();
+                    // Scroll to the first error
+                    const firstError = document.querySelector('.field-required-error[style="display: block;"]');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+            
+            // Clear error messages when user starts typing
+            requiredFields.forEach(field => {
+                const input = document.getElementById(field.id);
+                const errorElement = document.getElementById(field.errorId);
+                
+                input.addEventListener('input', function() {
+                    if (input.value.trim()) {
+                        errorElement.style.display = 'none';
+                    }
+                });
+            });
         });
     </script>
 </body>

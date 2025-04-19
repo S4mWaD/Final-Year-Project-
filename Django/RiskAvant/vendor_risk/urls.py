@@ -16,13 +16,12 @@ urlpatterns = [
     # New routes for additional features
     path('alerts/', views.alerts, name='alerts'),
     path('settings/', views.user_settings_view, name='settings'),
-    path('dashboard/', views.admin_dashboard, name='dashboard'),
     path('risk-list/', views.risk_list, name='risk-list'),
     path('checklist-list/', views.checklist_list, name='checklist-list'),
     path('compliance/', views.compliance, name='compliance'),
     path('audit-log/', views.audit_log, name='audit-log'),
     path('terms/', views.terms, name='terms'),
-    path('questionnaire/', views.generate_questionnaire, name='questionnaire'),
+    path('questionnaire/<int:vendor_id>/', views.generate_questionnaire, name='questionnaire'),
     path('risk_assessment/<int:assessment_id>/', views.risk_assessment_detail, name='risk_assessment'),
     
     # PDF Generation Route

@@ -1,4 +1,3 @@
-<!-- Home page for admin -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -9,37 +8,741 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>RiskAvant - Admin Home</title>
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{% static 'css/home.css' %}" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            /* Enhanced color palette with dark theme */
+            --primary: #4f46e5;
+            --primary-hover: #d85e11;
+            --secondary: #9ca3af;
+            --success: #10b981;
+            --success-hover: #34d399;
+            --info: #06b6d4;
+            --info-hover: #22d3ee;
+            --warning: #f59e0b;
+            --warning-hover: #fbbf24;
+            --danger: #ef4444;
+            --danger-hover: #f87171;
+            
+            /* Dark theme colors */
+            --dark: #1a202c;
+            --light: #2d3748;
+            --card-bg: #1e293b;
+            --text-primary: #f3f4f6;
+            --text-secondary: #d1d5db;
+            --border-color: #4b5563;
+            
+            /* Enhanced background gradients */
+            --sidebar-bg-start: #1e1e2d;
+            --sidebar-bg-end: #0f172a;
+            --topbar-bg: #1a1c2d;
+            --content-bg: #111827;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+            
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition: 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
         body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #f8f9fc;
+            background-color: var(--content-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color var(--transition);
         }
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+
+        #wrapper {
+            display: flex;
+            min-height: 100vh;
         }
-        .card-header {
+
+        #content-wrapper {
+            width: 100%;
+            background-color: var(--content-bg);
+            overflow-x: hidden;
+            transition: background-color var(--transition);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 14rem;
+            min-height: 100vh;
+            transition: width var(--transition), background-color var(--transition);
+            box-shadow: var(--shadow);
+            z-index: 100;
+            background-color: var(--sidebar-bg-start);
+            background-image: linear-gradient(180deg, var(--sidebar-bg-start) 10%, var(--sidebar-bg-end) 100%);
+        }
+
+        .sidebar .nav-item {
+            position: relative;
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar .nav-item .nav-link {
+            padding: 0.85rem 1.25rem;
+            color: rgba(255, 255, 255, 0.7);
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            border-radius: 0.5rem;
+            margin: 0 0.5rem;
+            transition: all var(--transition-fast);
+        }
+
+        .sidebar .nav-item .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+        }
+
+        .sidebar .nav-item .nav-link i {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+            transition: transform var(--transition-fast);
+        }
+
+        .sidebar .nav-item .nav-link:hover i {
+            transform: scale(1.1);
+        }
+
+        .sidebar .nav-item.active .nav-link {
+            color: #fff;
+            font-weight: 700;
+            background-color: rgba(79, 70, 229, 0.2);
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.1);
+            border-left: 3px solid var(--primary);
+        }
+
+        .sidebar-brand {
+            height: 4.375rem;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 1.5rem 1rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-brand-icon {
+            font-size: 1.4rem;
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+
+        .sidebar-brand-text {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0.5rem 1rem 1rem;
+        }
+
+        .sidebar-heading {
+            padding: 0 1rem;
+            font-weight: 800;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin: 1rem 0 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .rotate-n-15 {
+            transform: rotate(-15deg);
+        }
+
+        /* Topbar Styles */
+        .topbar {
+            height: 4.375rem;
+            background-color: var(--topbar-bg);
+            box-shadow: var(--shadow);
+            z-index: 99;
+            transition: background-color var(--transition);
+        }
+
+        .topbar .navbar-search {
+            width: 25rem;
+        }
+
+        .topbar .navbar-search input {
+            font-size: 0.9rem;
+            height: 2.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding-left: 1rem;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .topbar .navbar-search input:focus {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+        }
+
+        .topbar .navbar-search input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .topbar .topbar-divider {
+            width: 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            height: calc(4.375rem - 2rem);
+            margin: auto 1rem;
+        }
+
+        .topbar .nav-item .nav-link {
+            height: 4.375rem;
+            display: flex;
+            align-items: center;
+            padding: 0 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            position: relative;
+            transition: color var(--transition-fast);
+        }
+
+        .topbar .nav-item .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .topbar .nav-item .nav-link .badge-counter {
+            position: absolute;
+            transform: scale(0.85);
+            transform-origin: top right;
+            right: 0.25rem;
+            top: 0.25rem;
+        }
+
+        .dropdown .dropdown-menu {
+            font-size: 0.85rem;
+            padding: 0.5rem 0;
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            animation: dropdown-animation 0.2s ease-out;
+        }
+
+        @keyframes dropdown-animation {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1.2rem;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--primary);
+            transform: translateX(3px);
+        }
+
+        .dropdown-item i {
+            margin-right: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .img-profile {
+            height: 2.5rem;
+            width: 2.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 2px;
+            border-radius: 50%;
+            transition: all var(--transition-fast);
+        }
+
+        .img-profile:hover {
+            border-color: var(--primary);
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h6 {
+            margin: 0;
+            font-weight: 700;
             font-size: 1rem;
-            color: #4e73df; 
         }
-        .card-title {
-            font-size: 2rem;
+
+        .card-header .dropdown {
+            margin-left: auto;
         }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Stat Card Styles */
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .stat-card-body {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .stat-card-icon {
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            transition: all var(--transition-fast);
+        }
+
+        .stat-card:hover .stat-card-icon {
+            transform: scale(1.1);
+        }
+
+        .stat-card-primary .stat-card-icon {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-card-success .stat-card-icon {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .stat-card-warning .stat-card-icon {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-card-info .stat-card-icon {
+            background-color: rgba(6, 182, 212, 0.1);
+            color: var(--info);
+        }
+
+        .stat-card-dark .stat-card-icon {
+            background-color: rgba(156, 163, 175, 0.1);
+            color: var(--secondary);
+        }
+
+        .stat-card-content {
+            flex: 1;
+        }
+
+        .stat-card-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        /* Button Styles */
+        .btn {
+            font-weight: 600;
+            border: 1px solid transparent;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            border-radius: 0.5rem;
+            transition: all var(--transition-fast);
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.25);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            border-color: var(--success);
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+            border-color: var(--success-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-info {
+            background-color: var(--info);
+            border-color: var(--info);
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(6, 182, 212, 0.25);
+        }
+
+        .btn-info:hover {
+            background-color: var(--info-hover);
+            border-color: var(--info-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(6, 182, 212, 0.35);
+        }
+
+        .btn-light {
+            background-color: var(--light);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .btn-light:hover {
+            background-color: #3d4a61;
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* Table Styles */
+        .table-card {
+            overflow: hidden;
+        }
+
+        .table {
+            color: var(--text-primary);
+            margin-bottom: 0;
+        }
+
+        .table th {
+            border-top: none;
+            background-color: rgba(79, 70, 229, 0.05);
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05rem;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .table td {
+            vertical-align: middle;
+            padding: 0.75rem 1rem;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .badge {
+            font-weight: 600;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            border-radius: 0.375rem;
+        }
+
+        .badge-primary {
+            background-color: var(--primary);
+            color: #fff;
+        }
+
+        .badge-success {
+            background-color: var(--success);
+            color: #fff;
+        }
+
+        .badge-warning {
+            background-color: var(--warning);
+            color: #fff;
+        }
+
+        .badge-danger {
+            background-color: var(--danger);
+            color: #fff;
+        }
+
+        .badge-info {
+            background-color: var(--info);
+            color: #fff;
+        }
+
+        .badge-secondary {
+            background-color: var(--secondary);
+            color: #fff;
+        }
+
+        .badge-light {
+            background-color: var(--light);
+            color: var(--text-primary);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 20rem;
+            width: 100%;
+        }
+
+        /* Footer */
+        .sticky-footer {
+            padding: 1.5rem 0;
+            flex-shrink: 0;
+            background-color: var(--topbar-bg);
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Scroll to Top Button */
+        .scroll-to-top {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            display: none;
+            width: 2.75rem;
+            height: 2.75rem;
+            text-align: center;
+            color: white;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            line-height: 2.75rem;
+            z-index: 1000;
+            transition: all 0.2s ease;
+        }
+
+        .scroll-to-top:hover {
+            background-color: var(--primary);
+        }
+
+        .scroll-to-top.show {
+            display: block;
+        }
+
+        /* Dashboard specific styles */
         .dashboard-heading {
             font-weight: 700;
-            color: #4e73df;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.75rem;
         }
-        table th {
-            color: #4e73df;
-            font-weight: 600;
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .btn-sm i {
-            margin-right: 5px;
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--light);
+            border-radius: 4px;
+            transition: background var(--transition-fast);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 14rem !important;
+            }
+            
+            .sidebar.toggled {
+                width: 6.5rem !important;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link {
+                padding: 1rem;
+                text-align: center;
+                border-radius: 0.5rem;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link span {
+                display: none;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link i {
+                margin-right: 0;
+                font-size: 1.25rem;
+            }
+            
+            .sidebar.toggled .sidebar-brand .sidebar-brand-text {
+                display: none;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .sidebar {
+                width: 6.5rem !important;
+            }
+            
+            .sidebar .nav-item .nav-link {
+                padding: 1rem;
+                text-align: center;
+                border-radius: 0.5rem;
+            }
+            
+            .sidebar .nav-item .nav-link span {
+                display: none;
+            }
+            
+            .sidebar .nav-item .nav-link i {
+                margin-right: 0;
+                font-size: 1.25rem;
+            }
+            
+            .sidebar .sidebar-brand .sidebar-brand-text {
+                display: none;
+            }
+            
+            .sidebar.toggled {
+                width: 14rem !important;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link {
+                padding: 0.85rem 1.25rem;
+                text-align: left;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link span {
+                display: inline;
+            }
+            
+            .sidebar.toggled .nav-item .nav-link i {
+                margin-right: 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .sidebar.toggled .sidebar-brand .sidebar-brand-text {
+                display: inline;
+            }
         }
     </style>
 </head>
@@ -47,9 +750,9 @@
 <body id="page-top">
     <div id="wrapper">
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar">
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'dashboard' %}">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'home' %}">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-shield-alt"></i>
                 </div>
@@ -61,7 +764,7 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="{% url 'dashboard' %}">
+                <a class="nav-link" href="{% url 'home' %}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
@@ -132,8 +835,8 @@
             {% endif %}
 
             <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline mt-3">
-                <button class="btn btn-light btn-sm" id="sidebarToggle">
+            <div class="text-center d-none d-md-inline mt-3 mb-3">
+                <button class="btn btn-light btn-sm rounded-circle" id="sidebarToggle">
                     <i class="fas fa-angle-left"></i>
                 </button>
             </div>
@@ -145,31 +848,31 @@
             <!-- Main Content -->
             <div id="content">
                 <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow">
                     <!-- Sidebar Toggle (Topbar) -->
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none">
-                        <i class="fa fa-bars"></i>
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars text-white"></i>
                     </button>
 
+                    
+
                     <!-- Topbar Navbar -->
-                <ul class="navbar-nav ml-auto">
+                    <ul class="navbar-nav ml-auto">
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle"  id="userDropdown" role="button" data-toggle="dropdown">
-                                <div class="d-flex align-items-center">
-                                    <span class="mr-2 text-gray-600 small">{{ user.username }}</span>
-                                </div>
-                                
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-300 small">{{ user.username }}</span>
+                                <i class="fas fa-user-circle fa-fw text-gray-300"></i>
                             </a>
                             <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="userDropdown">
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="{% url 'profile' %}">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    <i class="fas fa-user fa-sm fa-fw mr-2"></i>
                                     Profile
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'logout' %}">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
                                     Logout
                                 </a>
                             </div>
@@ -177,177 +880,359 @@
                     </ul>
                 </nav>
                 <!-- End of Topbar -->
-<div class="container-fluid pt-4">
-    <h2 class="dashboard-heading text-center mb-4">Admin Dashboard</h2>
 
-    <div class="row">
-        <!-- Admin Stat Cards -->
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card text-white bg-primary">
-                <div class="card-header">Total Vendors</div>
-                <div class="card-body"><h4 class="card-title">{{ total_vendors }}</h4></div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card text-white bg-success">
-                <div class="card-header">Total Users</div>
-                <div class="card-body"><h4 class="card-title">{{ total_users }}</h4></div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card text-white bg-warning">
-                <div class="card-header">Total Responses</div>
-                <div class="card-body"><h4 class="card-title">{{ total_responses }}</h4></div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card text-white bg-info">
-                <div class="card-header">Total Risk Assessments</div>
-                <div class="card-body"><h4 class="card-title">{{ total_risk_assessments }}</h4></div>
-            </div>
-        </div>
-    </div>
+                <!-- Begin Page Content -->
+                <div class="container-fluid fade-in">
+                    <!-- Page Heading -->
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="dashboard-heading">Admin Dashboard</h1>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-primary shadow-sm">
+                            <i class="fas fa-download fa-sm text-white-50 mr-1"></i> Generate Report
+                        </a>
+                    </div>
 
-    <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="card text-white bg-dark">
-                <div class="card-header">Checklist Questions</div>
-                <div class="card-body"><h4 class="card-title">{{ total_questions }}</h4></div>
-            </div>
-        </div>
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow">
-                <div class="card-body">
-                    <canvas id="riskChart"></canvas>
+                    <!-- Content Row - Stat Cards -->
+                    <div class="row">
+                        <!-- Total Vendors Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stat-card stat-card-primary h-100">
+                                <div class="card-body stat-card-body">
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <div class="stat-card-label">Total Vendors</div>
+                                        <div class="stat-card-value">{{ total_vendors }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Users Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stat-card stat-card-success h-100">
+                                <div class="card-body stat-card-body">
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <div class="stat-card-label">Total Users</div>
+                                        <div class="stat-card-value">{{ total_users }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Responses Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stat-card stat-card-warning h-100">
+                                <div class="card-body stat-card-body">
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <div class="stat-card-label">Total Responses</div>
+                                        <div class="stat-card-value">{{ total_responses }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Risk Assessments Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stat-card stat-card-info h-100">
+                                <div class="card-body stat-card-body">
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <div class="stat-card-label">Risk Assessments</div>
+                                        <div class="stat-card-value">{{ total_risk_assessments }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Row - Charts and Checklist Questions -->
+                    <div class="row">
+                        <!-- Checklist Questions Card -->
+                        <div class="col-lg-4 mb-4">
+                            <div class="card stat-card stat-card-dark h-100">
+                                <div class="card-body stat-card-body">
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-tasks"></i>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <div class="stat-card-label">Checklist Questions</div>
+                                        <div class="stat-card-value">{{ total_questions }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risk Distribution Chart -->
+                        <div class="col-lg-8 mb-4">
+                            <div class="card shadow h-100">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Vendor Risk Distribution</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="riskChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Risk Assessments -->
+                    <div class="card shadow mb-4 table-card">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Recent Risk Assessments</h6>
+                            <a href="{% url 'risk-list' %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-arrow-right mr-1"></i> View All
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_assessments %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Vendor</th>
+                                            <th>Risk Level</th>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for assessment in recent_assessments %}
+                                        <tr>
+                                            <td>
+                                                <span class="font-weight-bold">{{ assessment.vendor.name }}</span>
+                                            </td>
+                                            <td>
+                                                {% if assessment.risk_level == 'High' %}
+                                                <span class="badge badge-danger">High</span>
+                                                {% elif assessment.risk_level == 'Medium' %}
+                                                <span class="badge badge-warning">Medium</span>
+                                                {% else %}
+                                                <span class="badge badge-success">Low</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ assessment.created_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                <a href="{% url 'risk_assessment' assessment.id %}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye mr-1"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <div class="text-muted mb-2">
+                                    <i class="fas fa-clipboard fa-3x"></i>
+                                </div>
+                                <p class="mb-0">No recent assessments available.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Vendor Onboarding Overview -->
+                    <div class="card shadow mb-4 table-card">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Vendor Onboarding Overview</h6>
+                            <span class="badge badge-primary">{{ vendors|length }} Vendors</span>
+                        </div>
+                        <div class="card-body">
+                            {% if vendors %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Email</th>
+                                            <th>Certifications</th>
+                                            <th>Risk Score</th>
+                                            <th>Checklist</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for vendor in vendors %}
+                                        <tr>
+                                            <td>
+                                                <span class="font-weight-bold">{{ vendor.name }}</span>
+                                            </td>
+                                            <td>{{ vendor.vendor_type }}</td>
+                                            <td>
+                                                <a href="mailto:{{ vendor.contact_email }}">{{ vendor.contact_email }}</a>
+                                            </td>
+                                            <td>
+                                                {% for cert in vendor.certifications.all %}
+                                                    <span class="badge badge-light">{{ cert.name }}</span>{% if not forloop.last %} {% endif %}
+                                                {% empty %}
+                                                    <span class="text-muted">None</span>
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                {% if vendor.risk_assessments.last %}
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="mr-2">{{ vendor.risk_assessments.last.total_risk_score }}</div>
+                                                        {% if vendor.risk_assessments.last.risk_level == 'High' %}
+                                                        <span class="badge badge-danger">High</span>
+                                                        {% elif vendor.risk_assessments.last.risk_level == 'Medium' %}
+                                                        <span class="badge badge-warning">Medium</span>
+                                                        {% else %}
+                                                        <span class="badge badge-success">Low</span>
+                                                        {% endif %}
+                                                    </div>
+                                                {% else %}
+                                                    <span class="text-muted">Not Assessed</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-secondary">{{ vendor.security_checklists.count }} items</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <div class="text-muted mb-2">
+                                    <i class="fas fa-building fa-3x"></i>
+                                </div>
+                                <p class="mb-0">No vendors onboarded yet.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
+                <!-- /.container-fluid -->
             </div>
-        </div>
-    </div>
+            <!-- End of Main Content -->
 
-    <!-- Recent Assessments -->
-    <div class="card shadow mb-5">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-primary">Recent Risk Assessments</h6>
-            <a href="{% url 'risk-list' %}" class="btn btn-sm btn-primary">
-                <i class="fas fa-arrow-right"></i> View All
-            </a>
-        </div>
-        <div class="card-body">
-            {% if recent_assessments %}
-            <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead>
-                        <tr>
-                            <th>Vendor</th>
-                            <th>Risk Level</th>
-                            <th>Date</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for assessment in recent_assessments %}
-                        <tr>
-                            <td>{{ assessment.vendor.name }}</td>
-                            <td>
-                                {% if assessment.risk_level == 'High' %}
-                                <span class="badge badge-danger">High</span>
-                                {% elif assessment.risk_level == 'Medium' %}
-                                <span class="badge badge-warning">Medium</span>
-                                {% else %}
-                                <span class="badge badge-success">Low</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ assessment.created_at|date:"M d, Y" }}</td>
-                            <td>
-                                <a href="{% url 'risk_assessment' assessment.id %}" class="btn btn-sm btn-info">
-                                    <i class="fas fa-eye"></i> View
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <p class="text-center text-muted">No recent assessments available.</p>
-            {% endif %}
-        </div>
-    </div>
-</div>
-        <!-- Footer -->
-        <footer class="sticky-footer bg-white">
-            <div class="container my-auto">
-                <div class="copyright text-center my-auto">
-                    <span>© 2025 RiskAvant. All rights reserved.</span>
+            <!-- Footer -->
+            <footer class="sticky-footer">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>© 2025 RiskAvant. All rights reserved.</span>
+                    </div>
                 </div>
-            </div>
-        </footer>
-        <!-- End of Footer -->
+            </footer>
+            <!-- End of Footer -->
+        </div>
+        <!-- End of Content Wrapper -->
     </div>
-    <!-- End of Content Wrapper -->
-</div>
-<!-- End of Page Wrapper -->
+    <!-- End of Page Wrapper -->
 
-<!-- Scroll to Top Button-->
-<a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-</a>
-<!-- Required for Bootstrap dropdowns to work -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
 
-<!-- Chart.js Script -->
-<script>
-    var rawData = '{{ chart_data|safe }}';
-    try {
-        var chartData = JSON.parse(rawData);
-    } catch (e) {
-        console.error("Chart parsing failed, fallback used.");
-        chartData = {
-            labels: ["Low Risk", "Medium Risk", "High Risk"],
-            datasets: [{
-                label: "Vendor Risk Levels",
-                data: [0, 0, 0],
-                backgroundColor: ["#28a745", "#ffc107", "#dc3545"]
-            }]
-        };
-    }
+    <!-- Required for Bootstrap dropdowns to work -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
-    var ctx = document.getElementById('riskChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: chartData,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'Vendor Risk Distribution' }
-            }
+    <!-- Chart.js Script -->
+    <script>
+        var rawData = '{{ chart_data|safe }}';
+        try {
+            var chartData = JSON.parse(rawData);
+        } catch (e) {
+            console.error("Chart parsing failed, fallback used.");
+            chartData = {
+                labels: ["Low Risk", "Medium Risk", "High Risk"],
+                datasets: [{
+                    label: "Vendor Risk Levels",
+                    data: [0, 0, 0],
+                    backgroundColor: ["#10b981", "#f59e0b", "#ef4444"]
+                }]
+            };
         }
-    });
-</script>
-<script>
-    // Sidebar toggler (bottom left)
-    const sidebarToggleBtn = document.getElementById('sidebarToggle');
-    const sidebar = document.querySelector('.sidebar');
-    const body = document.body;
 
-    if (sidebarToggleBtn) {
-        sidebarToggleBtn.addEventListener('click', function () {
-            sidebar.classList.toggle('toggled');
-            body.classList.toggle('sidebar-toggled');
+        var ctx = document.getElementById('riskChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        position: 'right',
+                        labels: {
+                            color: '#f3f4f6'
+                        }
+                    },
+                    title: { display: false }
+                },
+                cutout: '70%'
+            }
         });
-    }
+    </script>
 
-    // Optional: for topbar toggle (on mobile)
-    const sidebarToggleTop = document.getElementById('sidebarToggleTop');
-    if (sidebarToggleTop) {
-        sidebarToggleTop.addEventListener('click', function () {
-            sidebar.classList.toggle('toggled');
-            body.classList.toggle('sidebar-toggled');
+    <!-- Custom Scripts -->
+    <script>
+        // Sidebar toggler
+        const sidebarToggleBtn = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const contentWrapper = document.getElementById('content-wrapper');
+        const body = document.body;
+
+        if (sidebarToggleBtn) {
+            sidebarToggleBtn.addEventListener('click', function () {
+                sidebar.classList.toggle('toggled');
+                body.classList.toggle('sidebar-toggled');
+                
+                // Toggle the icon direction
+                const icon = sidebarToggleBtn.querySelector('i');
+                if (sidebar.classList.contains('toggled')) {
+                    icon.classList.remove('fa-angle-left');
+                    icon.classList.add('fa-angle-right');
+                } else {
+                    icon.classList.remove('fa-angle-right');
+                    icon.classList.add('fa-angle-left');
+                }
+            });
+        }
+
+        // Mobile sidebar toggle
+        const sidebarToggleTop = document.getElementById('sidebarToggleTop');
+        if (sidebarToggleTop) {
+            sidebarToggleTop.addEventListener('click', function () {
+                sidebar.classList.toggle('toggled');
+                body.classList.toggle('sidebar-toggled');
+            });
+        }
+
+        // Scroll to top button
+        const scrollToTopButton = document.querySelector('.scroll-to-top');
+        
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 100) {
+                scrollToTopButton.classList.add('show');
+            } else {
+                scrollToTopButton.classList.remove('show');
+            }
         });
-    }
-</script>
+
+        scrollToTopButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
 </body>
 </html>

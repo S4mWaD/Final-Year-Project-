@@ -689,7 +689,7 @@
                         <i class="fas fa-check-circle mr-2"></i> Onboarding complete! You can now generate your security questionnaire.
                     </div>
                     <div class="text-center mb-4">
-                        <a href="{% url 'questionnaire' %}" class="btn btn-primary"><i class="fas fa-file-alt mr-2"></i> Generate Questionnaire</a>
+                        <a href="{% url 'questionnaire'  vendor_id=vendor.id %}" class="btn btn-primary"><i class="fas fa-file-alt mr-2"></i> Generate Questionnaire</a>
                     </div>
                     {% endif %}
 
@@ -698,7 +698,11 @@
                         <i class="fas fa-check-circle mr-2"></i> Questionnaire submitted! You may now view your Risk Assessment Report.
                     </div>
                     <div class="text-center mb-4">
-                        <a href="{% url 'risk_assessment' latest_assessment.id  %}" class="btn btn-success"><i class="fas fa-shield-alt mr-2"></i> View Risk Report</a>
+                        {% if latest_assessment %}
+                            <a href="{% url 'risk_assessment' latest_assessment.id %}" class="btn btn-success">
+                                <i class="fas fa-shield-alt mr-2"></i> View Risk Report
+                            </a>
+                        {% endif %}
                     </div>
                     {% endif %}
 

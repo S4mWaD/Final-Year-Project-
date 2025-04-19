@@ -3,7 +3,7 @@ import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from .models import CustomUser, Vendor, RiskAssessment, Certification, SecurityProfile, SecurityChecklist, QuestionnaireRules, OnboardingQuestionnaire, VendorResponse,QuestionBank, SecurityChecklistTemplate
 from .forms import SignUpForm, VendorOnboardingForm, SecurityChecklistForm
@@ -15,7 +15,11 @@ from django.template.loader import render_to_string
 from django.db.models import Q 
 from datetime import datetime
 from django.templatetags.static import static
+from django.utils.timezone import now
+import logging 
+import re
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 # Home view
@@ -30,15 +34,15 @@ def home(request):
     if vendor:
         required_fields = [vendor.name, vendor.contact_email, vendor.contact_phone, vendor.address]
         onboarding_complete = all(required_fields)
-        submitted_questionnaire = VendorResponse.objects.filter(vendor=vendor).exists()
+        submitted_questionnaire = SecurityChecklist.objects.filter(vendor=vendor, response__isnull=False).exists()
         latest_assessment = RiskAssessment.objects.filter(vendor=vendor).order_by('-created_at').first()
         
 
     if user.is_superuser or user.is_staff:
         # Admin-side stats
         total_vendors = Vendor.objects.count()
-        total_responses = VendorResponse.objects.count()
-        total_questions = QuestionBank.objects.count()
+        total_responses = SecurityChecklist.objects.count()
+        total_questions = SecurityChecklistTemplate.objects.count()
         total_risk_assessments = RiskAssessment.objects.count()
         total_users = CustomUser.objects.count()
 
@@ -60,6 +64,9 @@ def home(request):
 
         # ✅ Include 5 most recent risk assessments
         recent_assessments = RiskAssessment.objects.select_related('vendor').order_by('-created_at')[:5]
+        vendors = Vendor.objects.select_related("user").prefetch_related(
+    "certifications", "risk_assessments", "security_checklists", "responses"
+)
 
         return render(request, 'home_admin.html', {
             'total_vendors': total_vendors,
@@ -69,6 +76,7 @@ def home(request):
             'total_users': total_users,
             'chart_data': chart_data_json,
             'recent_assessments': recent_assessments,  # ✅ Injected for dashboard table
+            'vendors' : vendors, 
         })
 
     else:
@@ -85,6 +93,68 @@ def home(request):
             'recent_assessments': recent_assessments,
             'latest_assessment': latest_assessment 
         })
+
+def compute_risk_score(vendor):
+    responses = SecurityChecklist.objects.filter(vendor=vendor, response__isnull=False)
+
+    SCORE_MAPPING = {"Yes": 0, "No": 10, "Partial": 5, "N/A": 0}
+    CATEGORY_WEIGHTS = {
+        "Technical": 40, "Compliance": 20, "Legal": 15,
+        "General": 15, "Operational": 10,
+    }
+
+    category_scores = {cat: 0 for cat in CATEGORY_WEIGHTS}
+    category_totals = {cat: 0 for cat in CATEGORY_WEIGHTS}
+
+    for item in responses:
+        # Normalize category to handle spaces and case mismatches
+        category = (item.category or "").strip().title()
+
+        # Log to verify if 'Compliance' category is being processed
+        if category == "Compliance":
+            print(f"[DEBUG] Processing Compliance Question: {item.question}")
+
+        # Fix missing category if not set
+        if not item.category:
+            template = SecurityChecklistTemplate.objects.filter(question=item.question).first()
+            if template:
+                item.category = template.category
+                item.save(update_fields=["category"])
+
+        if category not in CATEGORY_WEIGHTS:
+            continue
+
+        score = SCORE_MAPPING.get(item.response, 0)
+        template = SecurityChecklistTemplate.objects.filter(question=item.question).first()
+        if template and template.is_critical:
+            score *= 1.5
+
+        category_scores[category] += score
+        category_totals[category] += 10
+
+    weighted_scores = {
+        category: (category_scores[category] / (category_totals[category] or 1)) * CATEGORY_WEIGHTS[category]
+        for category in CATEGORY_WEIGHTS
+    }
+
+    overall_score = sum(weighted_scores.values())
+
+    if overall_score <= 20:
+        risk_level = "Low"
+    elif 20 < overall_score <= 50:
+        risk_level = "Medium"
+    else:
+        risk_level = "High"
+
+    RiskAssessment.objects.update_or_create(
+        vendor=vendor,
+        defaults={
+            'total_risk_score': int(overall_score),
+            'risk_level': risk_level,
+            'created_at': now()
+        }
+    )
+
 
 
 
@@ -132,45 +202,40 @@ def calculate_risk(request, vendor_id):
     vendor = get_object_or_404(Vendor, id=vendor_id)
     responses = SecurityChecklist.objects.filter(vendor=vendor, response__isnull=False)
 
-    # Define scoring system for responses
-    SCORE_MAPPING = {
-        "Yes": 0,       # No risk if best practice is followed
-        "No": 10,       # High risk if best practice is NOT followed
-        "Partial": 5,   # Medium risk if partially implemented
-        "N/A": 0        # No impact if not applicable
-    }
-
+    SCORE_MAPPING = {"Yes": 0, "No": 10, "Partial": 5, "N/A": 0}
     CATEGORY_WEIGHTS = {
-        "Technical": 40,
-        "Compliance": 20,
-        "Legal": 15,
-        "General": 15,
-        "Operational": 10,
+        "Technical": 40, "Compliance": 20, "Legal": 15,
+        "General": 15, "Operational": 10,
     }
 
     category_scores = {cat: 0 for cat in CATEGORY_WEIGHTS}
     category_totals = {cat: 0 for cat in CATEGORY_WEIGHTS}
 
     for item in responses:
-        category = item.category
-        score = SCORE_MAPPING.get(item.response, 0)
+        # Normalize category to handle spaces and case mismatches
+        category = (item.category or "").strip().title()
 
-        # Adjust for critical questions
-        try:
+        if not item.category:
             template = SecurityChecklistTemplate.objects.filter(question=item.question).first()
-            if template and template.is_critical:
-                score *= 1.5
-        except SecurityChecklistTemplate.DoesNotExist:
-            pass
+            if template:
+                item.category = template.category
+                item.save(update_fields=["category"])
 
-        if category in category_scores:
-            category_scores[category] += score
-            category_totals[category] += 10  # max score per question is 10
+        if category not in CATEGORY_WEIGHTS:
+            continue
 
-    weighted_scores = {}
-    for category, total_score in category_scores.items():
-        max_possible = category_totals[category] or 1  # Prevent div by zero
-        weighted_scores[category] = (total_score / max_possible) * CATEGORY_WEIGHTS[category]
+        score = SCORE_MAPPING.get(item.response, 0)
+        template = SecurityChecklistTemplate.objects.filter(question=item.question).first()
+        if template and template.is_critical:
+            score *= 1.5
+
+        category_scores[category] += score
+        category_totals[category] += 10
+
+    weighted_scores = {
+        category: (category_scores[category] / (category_totals[category] or 1)) * CATEGORY_WEIGHTS[category]
+        for category in CATEGORY_WEIGHTS
+    }
 
     overall_score = sum(weighted_scores.values())
 
@@ -185,7 +250,8 @@ def calculate_risk(request, vendor_id):
         vendor=vendor,
         defaults={
             'total_risk_score': int(overall_score),
-            'risk_level': risk_level
+            'risk_level': risk_level,
+            'created_at': now()
         }
     )
 
@@ -208,50 +274,6 @@ def calculate_risk(request, vendor_id):
         "chart_data": json.dumps(chart_data),
     })
 
-@login_required
-def admin_dashboard(request):
-    if not request.user.is_superuser:
-        return redirect('home')
-
-    # Gather statistics
-    total_vendors = Vendor.objects.count()
-    total_responses = VendorResponse.objects.count()
-    total_questions = QuestionBank.objects.count()
-    total_risk_assessments = RiskAssessment.objects.count()
-    total_users = CustomUser.objects.count()
-
-    # Risk Assessment Levels
-    low_risk_count = RiskAssessment.objects.filter(risk_level="Low").count()
-    medium_risk_count = RiskAssessment.objects.filter(risk_level="Medium").count()
-    high_risk_count = RiskAssessment.objects.filter(risk_level="High").count()
-
-    # Print statements for debugging
-    print("Low Risk Count:", low_risk_count)
-    print("Medium Risk Count:", medium_risk_count)
-    print("High Risk Count:", high_risk_count)
-
-    # Chart Data
-    chart_data = {
-        "labels": ["Low Risk", "Medium Risk", "High Risk"],
-        "datasets": [{
-            "label": "Risk Assessment Levels",
-            "data": [low_risk_count, medium_risk_count, high_risk_count],
-            "backgroundColor": ["#28a745", "#ffc107", "#dc3545"]
-        }]
-    }
-
-    # Convert to JSON format
-    chart_data_json = json.dumps(chart_data)
-    print("Final Chart Data JSON:", chart_data_json)  # Print the final JSON to verify
-
-    return render(request, 'dashboard.html', {
-        'total_vendors': total_vendors,
-        'total_responses': total_responses,
-        'total_questions': total_questions,
-        'total_risk_assessments': total_risk_assessments,
-        'total_users': total_users,
-        'chart_data': chart_data_json,
-    })
 
 # Vendor Risk Assessment View
 @login_required
@@ -269,23 +291,29 @@ def risk_assessment_detail(request, assessment_id):
         "General": 15, "Operational": 10,
     }
 
-    category_scores = {k: 0 for k in CATEGORY_WEIGHTS}
-    category_totals = {k: 0 for k in CATEGORY_WEIGHTS}
+    category_scores = {cat: 0 for cat in CATEGORY_WEIGHTS}
+    category_totals = {cat: 0 for cat in CATEGORY_WEIGHTS}
 
     for item in responses:
-        category = item.category
-        score = SCORE_MAPPING.get(item.response, 0)
+        # Normalize category to handle spaces and case mismatches
+        category = (item.category or "").strip().title()
 
-        try:
+        if not item.category:
             template = SecurityChecklistTemplate.objects.filter(question=item.question).first()
-            if template.is_critical:
-                score *= 1.5
-        except SecurityChecklistTemplate.DoesNotExist:
-            pass
+            if template:
+                item.category = template.category
+                item.save(update_fields=["category"])
 
-        if category in category_scores:
-            category_scores[category] += score
-            category_totals[category] += 10
+        if category not in CATEGORY_WEIGHTS:
+            continue
+
+        score = SCORE_MAPPING.get(item.response, 0)
+        template = SecurityChecklistTemplate.objects.filter(question=item.question).first()
+        if template and template.is_critical:
+            score *= 1.5
+
+        category_scores[category] += score
+        category_totals[category] += 10
 
     weighted_scores = {
         c: (category_scores[c] / (category_totals[c] or 1)) * CATEGORY_WEIGHTS[c]
@@ -312,6 +340,7 @@ def risk_assessment_detail(request, assessment_id):
         'chart_data': json.dumps(chart_data),
         'date': assessment.assessment_date,
     })
+
 # Vendor List View
 @login_required
 def vendor_list(request):
@@ -342,122 +371,165 @@ def vendor_onboarding(request, user_id):
     return render(request, 'onboarding.html', {'user_role': request.user.role, 'form': form, 'user': user})
 
 
+from django.db.models.functions import Lower
+from django.db.models import Q
+
 def assign_questionnaire_to_vendor(vendor):
     questions = SecurityChecklistTemplate.objects.filter(
         category__in=["General", "Legal", "Operational"]
     )
 
-    # Add technical questions based on vendor type
     questions |= SecurityChecklistTemplate.objects.filter(
-        category="Technical",
-        vendor_type=vendor.vendor_type
-    )
+        category="Technical"
+    ).filter(Q(vendor_type=vendor.vendor_type) | Q(vendor_type="Any"))
 
-    # Add compliance questions if vendor has selected certifications
     selected_cert_names = vendor.certifications.values_list('name', flat=True)
     if selected_cert_names:
-        questions |= SecurityChecklistTemplate.objects.filter(
+        normalized = [cert.strip().lower() for cert in selected_cert_names]
+
+        compliance = SecurityChecklistTemplate.objects.annotate(
+            lower_standard=Lower("compliance_standard")
+        ).filter(
             category="Compliance",
             standard_required=True,
-            compliance_standard__in=selected_cert_names
+            lower_standard__in=normalized
         )
+        questions |= compliance
 
     for q in questions.distinct():
-        SecurityChecklist.objects.get_or_create(
+        checklist, created = SecurityChecklist.objects.get_or_create(
             vendor=vendor,
             question=q.question,
-            defaults={"status": "Pending"}
+            defaults={
+                "status": "Pending",
+                "category": q.category
+            }
         )
+
+        # 🛠 Ensure category is correctly set
+        if not checklist.category:
+            checklist.category = q.category
+            checklist.save(update_fields=["category"])
 
 
 @login_required
-def generate_questionnaire(request):
-    vendor = get_object_or_404(Vendor, user=request.user)
+def generate_questionnaire(request, vendor_id):
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    
+    # Ensure the vendor belongs to the current logged-in user
+    if vendor.user != request.user:
+        return HttpResponseForbidden("You are not authorized to view this page.")
+    
+    if request.method == "POST":
+        # Log POST data for debugging
+        logger.debug(f"POST data for vendor {vendor.id}: {request.POST}")
+        
+        # Process existing checklist items
+        all_items = SecurityChecklist.objects.filter(vendor=vendor)
+        saved_items = []
+        for item in all_items:
+            answer = request.POST.get(f"response_{item.id}")
+            if answer is not None:
+                item.response = answer
+                item.status = "Completed"
+                item.save()
+                saved_items.append(item.id)
+            else:
+                logger.warning(f"No response found for checklist item {item.id} (question: {item.question}, category: {item.category})")
+        
+        # Log any checklist items that weren't saved
+        unsaved_items = all_items.exclude(id__in=saved_items)
+        if unsaved_items:
+            logger.warning(f"Unsaved checklist items for vendor {vendor.id}: {[f'ID:{item.id}, Question:{item.question}, Category:{item.category}' for item in unsaved_items]}")
+        
+        # Compute risk score and redirect
+        compute_risk_score(vendor)
+        messages.success(request, "Checklist responses saved successfully.")
+        return redirect("home")
 
-    # STEP 1: Assign questions if not already done
-    if not SecurityChecklist.objects.filter(vendor=vendor).exists():
+    else:  # GET request
+        # Fetch questions from various categories
         questions = SecurityChecklistTemplate.objects.filter(
             category__in=["General", "Legal", "Operational"]
         )
-
-        # Add Technical questions by vendor type or Any
         questions |= SecurityChecklistTemplate.objects.filter(
             category="Technical"
         ).filter(Q(vendor_type=vendor.vendor_type) | Q(vendor_type="Any"))
 
-        # Add Compliance questions based on selected certifications
+        # Filter compliance questions based on vendor certifications
+        def normalize_string(s):
+            if not s:
+                return ""
+            s = s.strip().lower()
+            s = re.sub(r'\s+', ' ', s)
+            s = re.sub(r'[-_]', ' ', s)
+            return s
+
         selected_cert_names = vendor.certifications.values_list('name', flat=True)
         if selected_cert_names:
-            questions |= SecurityChecklistTemplate.objects.filter(
+            normalized = [normalize_string(cert) for cert in selected_cert_names]
+            compliance = SecurityChecklistTemplate.objects.annotate(
+                normalized_standard=Lower("compliance_standard")
+            ).filter(
                 category="Compliance",
                 standard_required=True,
-                compliance_standard__in=selected_cert_names
+                normalized_standard__in=normalized
             )
+            # Log unmatched certifications
+            all_standards = SecurityChecklistTemplate.objects.filter(category="Compliance", standard_required=True).values_list('compliance_standard', flat=True)
+            unmatched = set(normalized) - set(normalize_string(std) for std in all_standards if std)
+            if unmatched:
+                logger.warning(f"Unmatched certifications for vendor {vendor.name}: {unmatched}")
+            questions |= compliance
 
+        # Create or update checklist items without deleting existing ones
+        existing_questions = SecurityChecklist.objects.filter(vendor=vendor).values_list('question', flat=True)
         for q in questions.distinct():
-            SecurityChecklist.objects.get_or_create(
-                vendor=vendor,
-                question=q.question,
-                defaults={
-                    "status": "Pending",
-                    "category": q.category
-                }
-            )
+            if q.question not in existing_questions:
+                checklist, created = SecurityChecklist.objects.get_or_create(
+                    vendor=vendor,
+                    question=q.question,
+                    defaults={
+                        "status": "Pending",
+                        "category": q.category
+                    }
+                )
+                if not checklist.category:
+                    checklist.category = q.category
+                    checklist.save(update_fields=["category"])
+            else:
+                # Update category if needed
+                checklist = SecurityChecklist.objects.get(vendor=vendor, question=q.question)
+                if checklist.category != q.category:
+                    checklist.category = q.category
+                    checklist.save(update_fields=["category"])
 
-    # STEP 2: Fetch checklist items grouped by category
-    all_items = SecurityChecklist.objects.filter(vendor=vendor)
-    categories = ["General", "Technical", "Legal", "Compliance", "Operational"]
+        # Fetch all checklist items for this vendor
+        all_items = SecurityChecklist.objects.filter(vendor=vendor)
+        categories = ["General", "Technical", "Legal", "Compliance", "Operational"]
 
-    #  Load template map to annotate critical status
-    template_map = {
-        t.question: t.is_critical
-        for t in SecurityChecklistTemplate.objects.all()
-    }
+        # Group checklist items by category, excluding Compliance
+        checklist_by_category = {
+            category: [item for item in all_items if item.category == category]
+            for category in categories if category != "Compliance"
+        }
 
-    for item in all_items:
-        item.is_critical = template_map.get(item.question, False)
+        # Group compliance questions by standard
+        compliance_items = [item for item in all_items if item.category == "Compliance"]
+        compliance_by_standard = {}
+        for item in compliance_items:
+            template = SecurityChecklistTemplate.objects.filter(question=item.question).first()
+            standard = getattr(template, 'compliance_standard', "Uncategorized") if template else "Uncategorized"
+            compliance_by_standard.setdefault(standard or "Uncategorized", []).append(item)
 
-    # Group all other categories normally
-    checklist_by_category = {
-        category: [item for item in all_items if item.category == category]
-        for category in categories if category != "Compliance"
-    }
+        # Log the number of compliance questions
+        logger.debug(f"Compliance questions for vendor {vendor.id}: {len(compliance_items)} items")
 
-    # Special handling for Compliance: group by standard
-    compliance_items = [item for item in all_items if item.category == "Compliance"]
-    compliance_by_standard = {}
-
-    for item in compliance_items:
-        try:
-            standard = next(
-                (t.compliance_standard for t in SecurityChecklistTemplate.objects.filter(question=item.question)), 
-                "Uncategorized"
-            ) or "Uncategorized"
-            compliance_by_standard.setdefault(standard, []).append(item)
-        except:
-            compliance_by_standard.setdefault("Unmapped", []).append(item)
-
-    # STEP 3: Handle form submission
-    if request.method == "POST":
-        for item in all_items:
-            answer = request.POST.get(f"response_{item.id}")
-            if answer:
-                item.response = answer
-                item.status = "Completed"
-                item.save()
-
-        messages.success(request, "Checklist responses saved successfully. Please proceed with your risk assessment.")
-        return redirect("home")
-
-    # STEP 4: Render the questionnaire
-    return render(request, "questionnaire.html", {
-        "checklist_by_category": checklist_by_category,
-        "compliance_by_standard": compliance_by_standard,
-        "categories": categories
-    })
-
-
-
+        return render(request, "questionnaire.html", {
+            "checklist_by_category": checklist_by_category,
+            "compliance_by_standard": compliance_by_standard,
+            "categories": categories
+        })
 
 # Other Views
 @login_required
