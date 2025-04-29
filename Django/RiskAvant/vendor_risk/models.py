@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now
 
-# 🛡️ Custom User Model
+#  Custom User Model
 class CustomUser(AbstractUser):
     ROLE_CHOICES = [
         ('Admin', 'Admin'),
@@ -19,7 +19,7 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return f"{self.username} - ({self.role})"
 
-# 🛡️ Vendor Model
+# Vendor Model
 class Vendor(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="vendor_profile", default=1)
     VENDOR_TYPES = [
@@ -52,14 +52,14 @@ class Vendor(models.Model):
     def __str__(self):
         return self.name
 
-# 🛡️ Certification Model
+# Certification Model
 class Certification(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name
 
-# 🛡️ Security Profile Model
+# Security Profile Model
 class SecurityProfile(models.Model):
     vendor = models.OneToOneField(Vendor, on_delete=models.CASCADE, related_name="security_profile")
     encryption = models.BooleanField(default=False)
@@ -79,12 +79,12 @@ class SecurityProfile(models.Model):
     def __str__(self):
         return f"Security Profile for {self.vendor.name}"
 
-# 🛡️ Risk Assessment Model
+# Risk Assessment Model
 class RiskAssessment(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='risk_assessments')
     assessment_date = models.DateField(default=now)
-    total_risk_score = models.IntegerField(default=0)  # ✅ Added field to store cumulative risk score
-    risk_level = models.CharField(max_length=50, choices=[('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')], default="Low")  # ✅ Added risk categorization
+    total_risk_score = models.IntegerField(default=0)  # Added field to store cumulative risk score
+    risk_level = models.CharField(max_length=50, choices=[('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')], default="Low")  # Added risk categorization
     compliance_status = models.CharField(max_length=50, choices=[('Compliant', 'Compliant'), ('Non-Compliant', 'Non-Compliant')], default='Non-Compliant')
     recommendations = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -93,7 +93,7 @@ class RiskAssessment(models.Model):
     def __str__(self):
         return f"{self.vendor.name} - {self.total_risk_score} Risk Score" 
 
-# 🛡️ Onboarding Questionnaire Model
+#  Onboarding Questionnaire Model
 class OnboardingQuestionnaire(models.Model):
     QUESTION_CATEGORIES = [
         ('General', 'General'),
@@ -109,13 +109,13 @@ class OnboardingQuestionnaire(models.Model):
     def __str__(self):
         return f"[{self.category}] {self.question_text}"
 
-# 🛡️ Vendor Response Model
+# Vendor Response Model
 
 class SecurityChecklist(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='security_checklists')
     question = models.TextField()
     response = models.TextField(blank=True, null=True)
-    score = models.IntegerField(default=0)  # ✅ New field to store risk score per question
+    score = models.IntegerField(default=0)  # New field to store risk score per question
     status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed')], default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -130,7 +130,7 @@ class SecurityChecklist(models.Model):
     def __str__(self):
         return f"Checklist for {self.vendor.name}"
 
-    # 🛡️ Questionnaire Rules Model
+    # Questionnaire Rules Model
 class QuestionnaireRules(models.Model):
     vendor_type = models.CharField(max_length=50, choices=Vendor.VENDOR_TYPES)
     requires_certification = models.BooleanField(default=False)
@@ -155,7 +155,7 @@ class QuestionBank(models.Model):
     vendor_type = models.CharField(
         max_length=50,
         choices=Vendor.VENDOR_TYPES,
-        blank=True,  # ✅ Allows empty values only for General & Legal
+        blank=True,  # Allows empty values only for General & Legal
         null=True
     )
     required_certifications = models.ManyToManyField("Certification", blank=True)

@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-_k!=$4k6#krgu=qw#c!#3+jsqf788xdd8m@643utvb$r5i&1w&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -72,10 +72,11 @@ DATABASES = {
         'NAME': 'riskavanta',
         'USER': 'postgres',
         'PASSWORD': 'sorryla',
-        'HOST': 'localhost',
+        'HOST': 'host.docker.internal',  # <-- Updated here
         'PORT': '5432',
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

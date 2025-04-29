@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,7 @@
   <title>RiskAvant | Vendor Risk Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/landing.css">
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}">
 </head>
 <body>
   <div class="app">
@@ -59,7 +60,7 @@
         </div>
         <div class="hero-image">
           <!-- Inserting a placeholder image -->
-          <img src="%% static 'img' %" alt="RiskAvant Dashboard Preview">
+          <img src="{%static 'images/dash.png' %}" alt="RiskAvant Dashboard Preview">
         </div>
       </div>
     </section>

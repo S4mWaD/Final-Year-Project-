@@ -233,11 +233,12 @@
             list-style-type: none;
             padding: 0;
             margin: 0 0 15px 0;
-            color: var(--danger-hover); /* Brighter red for better visibility */
+            color: var(--danger-hover);
             font-size: 14px;
-            background-color: rgba(239, 68, 68, 0.15); /* Slightly more visible background */
+            background-color: rgba(239, 68, 68, 0.15);
             border-radius: 6px;
             padding: 10px 15px;
+            animation: fadeIn 0.3s ease-out;
         }
 
         ul.errorlist li {
@@ -297,7 +298,12 @@
 
         /* Hide required field errors by default */
         .field-required-error {
-            display: none;
+            display: none !important;
+            transition: all var(--transition-fast);
+        }
+
+        .field-required-error[style="display: block;"] {
+            animation: fadeIn 0.3s ease-out;
         }
 
         /* Animation */
@@ -629,6 +635,14 @@
                 { id: 'id_years_in_operation', errorId: 'years-error' }
             ];
             
+            // Hide all error messages on page load
+            requiredFields.forEach(field => {
+                const errorElement = document.getElementById(field.errorId);
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                }
+            });
+            
             form.addEventListener('submit', function(e) {
                 let hasError = false;
                 
@@ -661,11 +675,13 @@
                 const input = document.getElementById(field.id);
                 const errorElement = document.getElementById(field.errorId);
                 
-                input.addEventListener('input', function() {
-                    if (input.value.trim()) {
-                        errorElement.style.display = 'none';
-                    }
-                });
+                if (input && errorElement) {
+                    input.addEventListener('input', function() {
+                        if (input.value.trim()) {
+                            errorElement.style.display = 'none';
+                        }
+                    });
+                }
             });
         });
     </script>
